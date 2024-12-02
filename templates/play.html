@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ work.title }}</title>
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+    <h1>{{ work.title }}</h1>
+    <div>
+        {% for act in acts %}
+            <h2>{{ act.act_title }}</h2>
+            {% for scene in act.scenes %}
+                <h3>{{ scene.scene_title }}</h3>
+                {% for speech in scene.speeches %}
+                    <p><strong>{{ speech.speaker }}:</strong></p>
+                    {% for line in speech.lines %}
+                        <p>{{ line }}</p>
+                    {% endfor %}
+                {% endfor %}
+            {% endfor %}
+        {% endfor %}
+    </div>
+</body>
+</html>

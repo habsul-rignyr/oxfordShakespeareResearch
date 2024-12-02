@@ -16,13 +16,14 @@
     {% if results %}
         <h2>Results for "{{ query }}":</h2>
         <ul>
-            {% for work in results %}
-                <li>
-                    <strong>{{ work.title }}</strong> by {{ work.author }}
-                    ({{ work.genre }}, {{ work.publication_year }})
-                </li>
-            {% endfor %}
-        </ul>
+  {% for result in results %}
+    <li>
+      <a href="{{ url_for('render_play', work_id=result.id) }}">
+        {{ result.title }} by {{ result.author }} ({{ result.genre }}, {{ result.publication_year }})
+      </a>
+    </li>
+  {% endfor %}
+</ul>
     {% else %}
         {% if query %}
             <p>No results found for "{{ query }}".</p>

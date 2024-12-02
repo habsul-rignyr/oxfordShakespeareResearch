@@ -1,0 +1,33 @@
+@font-face {
+    font-family: 'IM Fell Regular';
+    src: url('/static/fonts/FeENrm28C.otf') format('opentype');
+    font-weight: normal;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'IM Fell Italic';
+    src: url('/static/fonts/FeENit27C.otf') format('opentype');
+    font-weight: normal;
+    font-style: italic;
+}
+
+/* Apply font globally */
+body {
+    font-family: 'IM Fell Regular', serif;
+    font-size: 18px;
+    line-height: 1.6;
+}
+
+h1, h2, h3 {
+    font-family: 'IM Fell Regular', serif;
+    font-weight: normal;
+}
+
+p {
+    font-family: 'IM Fell Regular', serif;
+}
+
+.italic {
+    font-family: 'IM Fell Italic', serif;
+}
