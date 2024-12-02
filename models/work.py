@@ -1,7 +1,7 @@
 from models import db  # Import db from models/__init__.py
 
 class Work(db.Model):
-    __tablename__ = 'works'
+    __tablename__ = 'work'
 
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(100), nullable=False)
