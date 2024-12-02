@@ -1,0 +1,13 @@
+# Virtual environment
+venv/
+
+# Python cache files
+__pycache__/
+*.pyc
+*.pyo
+
+# Database files
+*.db
+
+# IDE settings (optional, e.g., PyCharm)
+.idea/
