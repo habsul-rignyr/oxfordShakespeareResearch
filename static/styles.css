@@ -12,6 +12,13 @@
     font-style: italic;
 }
 
+@font-face {
+    font-family: 'Goudy Initialen';
+    src: url('/static/fonts/GoudyInitialen.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+
 /* Apply font globally */
 body {
     font-family: 'IM Fell Regular', serif;
@@ -49,4 +56,28 @@ p {
 
 .line {
     margin-left: 2em;
+    line-height: 1.6;
+}
+
+.line-with-dropcap {
+    margin-left: 0;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 0.2em;
+    margin-bottom: 0;  /* Remove extra space after dropcap line */
+    line-height: 1.6;
+}
+
+.dropcap {
+    font-family: 'Goudy Initialen', serif;
+    font-size: 3em;
+    line-height: 0.8;  /* Adjusted to better align with text */
+    align-self: end;
+    margin-right: 0.1em;
+}
+
+.dropcap-text {
+    align-self: end;
+    display: block;
+    padding-bottom: 0;  /* Remove padding to align exactly with dropcap bottom */
 }

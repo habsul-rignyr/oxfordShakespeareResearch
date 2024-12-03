@@ -25,7 +25,7 @@
                 <div class="speech">
                     <div class="speaker">{{ item.speaker }}:</div>
                     {% for line in item.lines %}
-                        <div class="line">{{ line }}</div>
+                        <div class="line">{{ line | safe }}</div>
                     {% endfor %}
                 </div>
             {% endif %}

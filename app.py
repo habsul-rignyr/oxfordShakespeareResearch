@@ -98,7 +98,7 @@ def render_play(work_id):
                             if line.find('dropcap') is not None:
                                 dropcap = line.find('dropcap').text
                                 remaining_text = ''.join(part for part in line.itertext() if part != dropcap)
-                                line_text = dropcap + remaining_text
+                                line_text = f'<div class="line-with-dropcap"><span class="dropcap">{dropcap}</span><span class="dropcap-text">{remaining_text}</span></div>'
                             else:
                                 line_text = ''.join(line.itertext())
 
