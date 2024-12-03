@@ -13,7 +13,7 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 # Initialize the database
 db.init_app(app)
 
-# Routes
+
 @app.route('/')
 def home():
     return render_template("home.html")
@@ -44,39 +44,91 @@ def search():
 
 @app.route('/play/<int:work_id>')
 def render_play(work_id):
-    # Retrieve the play from the database
     work = Work.query.get(work_id)
     if not work:
         abort(404, description="Play not found")
 
-    # Check if the file exists
     if not os.path.exists(work.file_path):
         abort(404, description="Play file not found")
 
-    # Parse the XML file
     try:
         tree = ET.parse(work.file_path)
         root = tree.getroot()
-        # Assuming the text is in <play> -> <act> -> <scene> -> <speech>
+
+        # In render_play function, modify the title processing:
+        title_element = root.find('.//title')
+        if title_element is not None:
+            title_parts = []
+            for part in title_element.itertext():
+                title_parts.append(part.strip())
+            play_title = ' '.join(title_parts)
+        else:
+            play_title = work.title
+
         acts = []
         for act in root.findall('act'):
             act_title = act.find('acttitle').text if act.find('acttitle') is not None else 'Unknown Act'
             scenes = []
-            for scene in act.findall('scene'):
-                scene_title = scene.find('scenetitle').text if scene.find('scenetitle') is not None else 'Unknown Scene'
-                speeches = []
-                for speech in scene.findall('speech'):
-                    speaker = speech.find('speaker').text if speech.find('speaker') is not None else 'Unknown Speaker'
-                    lines = [line.text for line in speech.findall('line')]
-                    speeches.append({'speaker': speaker, 'lines': lines})
-                scenes.append({'scene_title': scene_title, 'speeches': speeches})
-            acts.append({'act_title': act_title, 'scenes': scenes})
 
-        return render_template("play.html", work=work, acts=acts)
+            for scene in act.findall('scene'):
+                scene_title = scene.find('scenetitle')
+                # Only use scene_title if it's different from act_title
+                if scene_title is not None:
+                    scene_text = ''.join(scene_title.itertext())
+                    if scene_text != act_title:
+                        scene_title = scene_text
+                    else:
+                        scene_title = None
+
+                content = []  # Will hold both speeches and stage directions
+
+                # Process each child of the scene in order
+                for child in scene:
+                    if child.tag == 'speech':
+                        speaker = child.find('speaker').text if child.find('speaker') is not None else 'Unknown Speaker'
+                        lines = []
+
+                        for line in child.findall('line'):
+                            # Keep the special handling for dropcaps but preserve all other characters
+                            if line.find('dropcap') is not None:
+                                dropcap = line.find('dropcap').text
+                                remaining_text = ''.join(part for part in line.itertext() if part != dropcap)
+                                line_text = dropcap + remaining_text
+                            else:
+                                line_text = ''.join(line.itertext())
+
+                            if line_text:
+                                lines.append(line_text)
+
+                        content.append({
+                            'type': 'speech',
+                            'speaker': speaker,
+                            'lines': lines
+                        })
+
+                    elif child.tag == 'stagedir':
+                        stage_text = ''.join(child.itertext())
+                        if stage_text:
+                            content.append({
+                                'type': 'stagedir',
+                                'text': stage_text
+                            })
+
+                scenes.append({
+                    'scene_title': scene_title,
+                    'content': content
+                })
+
+            acts.append({
+                'act_title': act_title,
+                'scenes': scenes
+            })
+
+        return render_template("play.html", work=work, play_title=play_title, acts=acts)
+
     except ET.ParseError:
         abort(500, description="Error parsing the play file")
 
 
-# Main block
 if __name__ == "__main__":
     app.run(debug=True)

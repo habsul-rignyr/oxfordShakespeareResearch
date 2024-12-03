@@ -31,3 +31,22 @@ p {
 .italic {
     font-family: 'IM Fell Italic', serif;
 }
+
+/* Play-specific styles */
+.play-text {
+    margin: 2em;
+}
+
+.stage-direction {
+    font-family: 'IM Fell Italic', serif;
+    margin: 1em 0;
+}
+
+.speaker {
+    font-family: 'IM Fell Regular', serif;
+    margin-top: 1em;
+}
+
+.line {
+    margin-left: 2em;
+}

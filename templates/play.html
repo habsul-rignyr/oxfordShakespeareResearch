@@ -7,20 +7,31 @@
     <link rel="stylesheet" href="/static/styles.css">
 </head>
 <body>
-    <h1>{{ work.title }}</h1>
-    <div>
-        {% for act in acts %}
-            <h2>{{ act.act_title }}</h2>
-            {% for scene in act.scenes %}
-                <h3>{{ scene.scene_title }}</h3>
-                {% for speech in scene.speeches %}
-                    <p><strong>{{ speech.speaker }}:</strong></p>
-                    {% for line in speech.lines %}
-                        <p>{{ line }}</p>
+    <h1>{{ play_title }}</h1>
+
+<div class="play-text">
+{% for act in acts %}
+    <h2>{{ act.act_title }}</h2>
+
+    {% for scene in act.scenes %}
+        {% if scene.scene_title %}
+        <h3>{{ scene.scene_title }}</h3>
+        {% endif %}
+
+        {% for item in scene.content %}
+            {% if item.type == 'stagedir' %}
+                <div class="stage-direction">[{{ item.text }}]</div>
+            {% else %}
+                <div class="speech">
+                    <div class="speaker">{{ item.speaker }}:</div>
+                    {% for line in item.lines %}
+                        <div class="line">{{ line }}</div>
                     {% endfor %}
-                {% endfor %}
-            {% endfor %}
+                </div>
+            {% endif %}
         {% endfor %}
-    </div>
+    {% endfor %}
+{% endfor %}
+</div>
 </body>
 </html>
