@@ -1,3 +1,31 @@
+/* Define CSS variables for both themes */
+:root[data-theme="light"] {
+    --bg-color: #ffffff;
+    --text-color: #333333;
+    --nav-bg: #f8f8f8;
+    --nav-border: #ddd;
+    --link-color: #333;
+    --link-hover: #666;
+    --stage-direction-color: #666;
+    --button-bg: #f0f0f0;
+    --button-text: #333;
+    --search-border: #ddd;
+}
+
+:root[data-theme="dark"] {
+    --bg-color: #1a1a1a;
+    --text-color: #e0e0e0;
+    --nav-bg: #2d2d2d;
+    --nav-border: #404040;
+    --link-color: #e0e0e0;
+    --link-hover: #ffffff;
+    --stage-direction-color: #b0b0b0;
+    --button-bg: #404040;
+    --button-text: #e0e0e0;
+    --search-border: #404040;
+}
+
+/* Font definitions */
 @font-face {
     font-family: 'IM Fell Regular';
     src: url('/static/fonts/FeENrm28C.otf') format('opentype');
@@ -19,24 +47,81 @@
     font-style: normal;
 }
 
-/* Apply font globally */
+/* Apply theme colors */
 body {
     font-family: 'IM Fell Regular', serif;
     font-size: 18px;
     line-height: 1.6;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    transition: background-color 0.3s, color 0.3s;
 }
 
-h1, h2, h3 {
+/* Navbar styles */
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1em 2em;
+    background-color: var(--nav-bg);
+    border-bottom: 1px solid var(--nav-border);
+    transition: background-color 0.3s;
+}
+
+.nav-left, .nav-right {
+    display: flex;
+    gap: 1.5em;
+    align-items: center;
+}
+
+.nav-link {
+    text-decoration: none;
+    color: var(--link-color);
+}
+
+.nav-link:hover {
+    color: var(--link-hover);
+}
+
+/* Theme toggle button */
+.theme-toggle {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0.5em;
+    font-size: 1.2em;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Show/hide appropriate icon based on theme */
+:root[data-theme="light"] .dark-icon,
+:root[data-theme="dark"] .light-icon {
+    display: none;
+}
+
+/* Content area */
+.content {
+    padding: 2em;
+}
+
+/* Form elements */
+input[type="text"] {
+    padding: 0.5em;
     font-family: 'IM Fell Regular', serif;
-    font-weight: normal;
+    border: 1px solid var(--search-border);
+    background-color: var(--bg-color);
+    color: var(--text-color);
 }
 
-p {
+button {
+    padding: 0.5em 1em;
     font-family: 'IM Fell Regular', serif;
-}
-
-.italic {
-    font-family: 'IM Fell Italic', serif;
+    background-color: var(--button-bg);
+    color: var(--button-text);
+    border: 1px solid var(--nav-border);
+    cursor: pointer;
 }
 
 /* Play-specific styles */
@@ -46,6 +131,7 @@ p {
 
 .stage-direction {
     font-family: 'IM Fell Italic', serif;
+    color: var(--stage-direction-color);
     margin: 1em 0;
 }
 
@@ -56,22 +142,22 @@ p {
 
 .line {
     margin-left: 2em;
-    line-height: 1.6;
 }
 
+/* Dropcap styles */
 .line-with-dropcap {
     margin-left: 0;
     display: grid;
     grid-template-columns: auto 1fr;
     gap: 0.2em;
-    margin-bottom: 0;  /* Remove extra space after dropcap line */
+    margin-bottom: 0;
     line-height: 1.6;
 }
 
 .dropcap {
     font-family: 'Goudy Initialen', serif;
     font-size: 3em;
-    line-height: 0.8;  /* Adjusted to better align with text */
+    line-height: 0.8;
     align-self: end;
     margin-right: 0.1em;
 }
@@ -79,5 +165,60 @@ p {
 .dropcap-text {
     align-self: end;
     display: block;
-    padding-bottom: 0;  /* Remove padding to align exactly with dropcap bottom */
+    padding-bottom: 0;
+}
+
+/* Links */
+a {
+    color: var(--link-color);
+    text-decoration: none;
+}
+
+a:hover {
+    color: var(--link-hover);
+}
+
+.character-mappings {
+    margin: 2em 0;
+    font-family: 'IM Fell Regular', serif;
+}
+
+.character-mappings summary {
+    cursor: pointer;
+    padding: 0.5em;
+    border: 1px solid var(--nav-border);
+    background-color: var(--nav-bg);
+    font-size: 1.1em;
+}
+
+.character-mappings summary:hover {
+    background-color: var(--button-bg);
+}
+
+.mappings-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1em;
+    padding: 1em;
+    border: 1px solid var(--nav-border);
+    border-top: none;
+}
+
+.mapping {
+    display: grid;
+    grid-template-columns: auto auto 1fr;
+    gap: 0.5em;
+    align-items: center;
+}
+
+.short-name {
+    font-weight: bold;
+}
+
+.name-separator {
+    color: var(--stage-direction-color);
+}
+
+.full-name {
+    color: var(--text-color);
 }

@@ -1,37 +1,43 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ work.title }}</title>
-    <link rel="stylesheet" href="/static/styles.css">
-</head>
-<body>
+{% extends "base.html" %}
+
+{% block content %}
     <h1>{{ play_title }}</h1>
 
+<details class="character-mappings">
+    <summary>Character Names</summary>
+    <div class="mappings-grid">
+        {% for mapping in character_mappings %}
+        <div class="mapping">
+            <span class="short-name">{{ mapping.short }}</span>
+            <span class="name-separator">→</span>
+            <span class="full-name">{{ mapping.full }}</span>
+        </div>
+        {% endfor %}
+    </div>
+</details>
+
 <div class="play-text">
-{% for act in acts %}
-    <h2>{{ act.act_title }}</h2>
+    {% for act in acts %}
+        <h2>{{ act.act_title }}</h2>
 
-    {% for scene in act.scenes %}
-        {% if scene.scene_title %}
-        <h3>{{ scene.scene_title }}</h3>
-        {% endif %}
-
-        {% for item in scene.content %}
-            {% if item.type == 'stagedir' %}
-                <div class="stage-direction">[{{ item.text }}]</div>
-            {% else %}
-                <div class="speech">
-                    <div class="speaker">{{ item.speaker }}:</div>
-                    {% for line in item.lines %}
-                        <div class="line">{{ line | safe }}</div>
-                    {% endfor %}
-                </div>
+        {% for scene in act.scenes %}
+            {% if scene.scene_title %}
+            <h3>{{ scene.scene_title }}</h3>
             {% endif %}
+
+            {% for item in scene.content %}
+                {% if item.type == 'stagedir' %}
+                    <div class="stage-direction">[{{ item.text }}]</div>
+                {% else %}
+                    <div class="speech">
+                        <div class="speaker">{{ item.speaker }}:</div>
+                        {% for line in item.lines %}
+                            <div class="line">{{ line | safe }}</div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            {% endfor %}
         {% endfor %}
     {% endfor %}
-{% endfor %}
-</div>
-</body>
-</html>
+    </div>
+{% endblock %}

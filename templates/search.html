@@ -1,33 +1,27 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Search Results</title>
-</head>
-<body>
-    <h1>Search Results</h1>
+{% extends "base.html" %}
 
-    <form action="/search" method="get">
-        <input type="text" name="query" placeholder="Search by title or author" value="{{ query }}">
-        <button type="submit">Search</button>
-    </form>
+{% block title %}Search - Shakespeare Authorship Project{% endblock %}
 
-    {% if results %}
-        <h2>Results for "{{ query }}":</h2>
-        <ul>
-  {% for result in results %}
-    <li>
-      <a href="{{ url_for('render_play', work_id=result.id) }}">
-        {{ result.title }} by {{ result.author }} ({{ result.genre }}, {{ result.publication_year }})
-      </a>
-    </li>
-  {% endfor %}
-</ul>
-    {% else %}
-        {% if query %}
-            <p>No results found for "{{ query }}".</p>
-        {% endif %}
+{% block content %}
+<h1>Search Results</h1>
+
+<form action="/search" method="get">
+    <input type="text" name="query" placeholder="Search the corpus" value="{{ query }}">
+    <button type="submit">Search</button>
+</form>
+
+{% if results %}
+    <h2>Results for "{{ query }}":</h2>
+    {% for result in results %}
+        <div>
+            <a href="{{ url_for('render_play', work_id=result.id) }}">
+                {{ result.title }} by {{ result.author }} ({{ result.genre }}, {{ result.publication_year }})
+            </a>
+        </div>
+    {% endfor %}
+{% else %}
+    {% if query %}
+        <p>No results found for "{{ query }}".</p>
     {% endif %}
-</body>
-</html>
+{% endif %}
+{% endblock %}
