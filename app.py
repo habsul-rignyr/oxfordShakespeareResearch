@@ -55,7 +55,7 @@ def render_play(work_id):
         tree = ET.parse(work.file_path)
         root = tree.getroot()
 
-        # In render_play function, modify the title processing:
+        # Get the play title just once at the start
         title_element = root.find('.//title')
         if title_element is not None:
             title_parts = []
@@ -85,7 +85,12 @@ def render_play(work_id):
                 # Process each child of the scene in order
                 for child in scene:
                     if child.tag == 'speech':
-                        speaker = child.find('speaker').text if child.find('speaker') is not None else 'Unknown Speaker'
+                        speaker_elem = child.find('speaker')
+                        if speaker_elem is not None:
+                            # Use the short attribute if available, otherwise use the text content
+                            speaker = speaker_elem.get('short') or speaker_elem.text or 'Unknown Speaker'
+                        else:
+                            speaker = 'Unknown Speaker'
                         lines = []
 
                         for line in child.findall('line'):
