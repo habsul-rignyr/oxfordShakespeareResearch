@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="blog-editor">
+    <h1>Create New Blog Post</h1>
+    
+    <form method="POST" enctype="multipart/form-data">
+        <div class="form-group">
+            <label for="title">Title</label>
+            <input type="text" id="title" name="title" required class="form-input">
+        </div>
+        
+        <div class="form-group">
+            <label for="header_image">Header Image</label>
+            <input type="file" id="header_image" name="header_image" accept="image/*" class="form-input">
+        </div>
+        
+        <div class="form-group">
+            <label for="content">Content</label>
+            <textarea id="content" name="content" rows="15" required class="form-input"></textarea>
+        </div>
+        
+        <button type="submit" class="btn-primary">Publish Post</button>
+    </form>
+</div>
+{% endblock %}

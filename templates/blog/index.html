@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+{% if session.get('user_id') %}
+    {% set user = get_user(session['user_id']) %}
+    {% if user.is_admin %}
+    <div class="admin-actions">
+        <a href="{{ url_for('new_post') }}" class="btn-primary">Create New Post</a>
+    </div>
+    {% endif %}
+{% endif %}
+
+<div class="blog-index">
+    <h1>Shakespeare Project Blog</h1>
+    
+    <div class="blog-posts">
+        {% for post in posts %}
+        <article class="blog-preview">
+            <h2><a href="{{ url_for('blog_post', slug=post.slug) }}">{{ post.title }}</a></h2>
+            <div class="post-meta">
+                Posted on {{ post.created_at|format_date }}
+            </div>
+            <div class="post-preview">
+                {{ post.content[:200] }}...
+            </div>
+            <a href="{{ url_for('blog_post', slug=post.slug) }}" class="read-more">Read more</a>
+        </article>
+        {% else %}
+        <p>No blog posts yet.</p>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

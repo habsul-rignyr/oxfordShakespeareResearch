@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+{% block content %}
+<article class="blog-post">
+    <header class="post-header">
+        {% if post.header_image %}
+        <img src="{{ url_for('static', filename='header_images/' + post.header_image) }}"
+             alt="{{ post.title }}"
+             class="post-header-image">
+        {% endif %}
+        <h1>{{ post.title }}</h1>
+        <div class="post-metadata">
+            Posted by {{ post.author.name }} on {{ post.created_at|format_date }}
+        </div>
+    </header>
+
+    <div class="post-content">
+        {{ post.content }}
+    </div>
+
+    {% macro render_comment(comment) %}
+<div class="comment {% if comment.parent_id %}reply{% endif %}">
+    <div class="comment-header">
+        <button class="collapse-button" onclick="toggleComment('{{ comment.id }}')">
+            <span class="collapse-icon" id="collapse-icon-{{ comment.id }}">▼</span>
+        </button>
+        <div class="comment-metadata">
+            <span class="comment-author">{{ comment.author.name }}</span>
+            <span class="comment-date">{{ comment.created_at|format_date }}</span>
+        </div>
+    </div>
+
+    <div class="comment-body" id="comment-body-{{ comment.id }}">
+        <div class="comment-content">
+            {{ comment.content }}
+        </div>
+        {% if session.get('user_id') %}
+        <button class="reply-button" onclick="toggleReplyForm('{{ comment.id }}')">Reply</button>
+        <form class="reply-form" id="reply-form-{{ comment.id }}" style="display: none;"
+              method="POST" action="{{ url_for('new_comment', slug=post.slug) }}">
+            <textarea name="content" class="comment-textarea" required></textarea>
+            <input type="hidden" name="parent_id" value="{{ comment.id }}">
+            <button type="submit" class="btn-primary">Submit Reply</button>
+        </form>
+        {% endif %}
+
+        {% if comment.replies %}
+        <div class="comment-replies">
+            {% for reply in comment.get_replies() %}
+                {{ render_comment(reply) }}
+            {% endfor %}
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endmacro %}
+
+<article class="blog-post">
+    <!-- Post header and content remain the same -->
+
+    <section class="comments-section">
+        <!-- Comment form remains the same -->
+
+        <div class="comment-list">
+            {% for comment in comments %}
+                {{ render_comment(comment) }}
+            {% endfor %}
+        </div>
+    </section>
+</article>
+
+<script>
+function toggleReplyForm(commentId) {
+    const form = document.getElementById(`reply-form-${commentId}`);
+    form.style.display = form.style.display === 'none' ? 'block' : 'none';
+}
+
+function toggleComment(commentId) {
+    const body = document.getElementById(`comment-body-${commentId}`);
+    const icon = document.getElementById(`collapse-icon-${commentId}`);
+    if (body.style.display === 'none') {
+        body.style.display = 'block';
+        icon.textContent = '▼';
+    } else {
+        body.style.display = 'none';
+        icon.textContent = '▶';
+    }
+}
+</script>
+{% endblock %}

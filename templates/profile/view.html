@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="profile-container">
+  <div class="profile-header">
+    <img src="{{ user.avatar or '/static/default_avatar.png' }}" alt="{{ user.username }}'s avatar" class="profile-avatar">
+    <h1 class="profile-name">{{ user.name }}</h1>
+  </div>
+
+  <div class="profile-content">
+    <p class="profile-bio">{{ user.bio }}</p>
+
+    <div class="profile-links">
+      {% if user.twitter %}
+        <a href="https://twitter.com/{{ user.twitter }}" target="_blank">Twitter</a>
+      {% endif %}
+      {% if user.github %}
+        <a href="https://github.com/{{ user.github }}" target="_blank">GitHub</a>
+      {% endif %}
+      {% if user.website %}
+        <a href="{{ user.website }}" target="_blank">Website</a>
+      {% endif %}
+    </div>
+
+    {% if is_owner %}
+      <a href="{{ url_for('edit_profile') }}" class="btn btn-primary edit-profile-btn">Edit Profile</a>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

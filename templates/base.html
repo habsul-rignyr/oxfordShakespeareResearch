@@ -11,21 +11,25 @@
         <div class="nav-left">
             <a href="{{ url_for('home') }}" class="nav-link">Home</a>
             <a href="{{ url_for('search') }}" class="nav-link">Search</a>
+            <a href="{{ url_for('blog_index') }}" class="nav-link">Blog</a>
         </div>
         <div class="nav-right">
-            <button id="theme-toggle" class="theme-toggle">
-                <span class="light-icon">☀️</span>
-                <span class="dark-icon">🌙</span>
-            </button>
-            <a href="#" class="nav-link">Login</a>
-        </div>
+    <button id="theme-toggle" class="theme-toggle">
+        <span class="light-icon">☀️</span>
+        <span class="dark-icon">🌙</span>
+    </button>
+    {% if session.get('user_id') %}
+        <a href="{{ url_for('profile') }}" class="nav-link">Profile</a>
+        <a href="{{ url_for('logout') }}" class="nav-link">Logout</a>
+    {% else %}
+        <a href="{{ url_for('login') }}" class="nav-link">Login</a>
+    {% endif %}
+</div>
     </nav>
-
     <div class="content">
         {% block content %}
         {% endblock %}
     </div>
-
     <script>
         // Check for saved theme preference or default to light
         const theme = localStorage.getItem('theme') || 'light';
@@ -36,7 +40,6 @@
         themeToggle.addEventListener('click', () => {
             const currentTheme = document.documentElement.getAttribute('data-theme');
             const newTheme = currentTheme === 'light' ? 'dark' : 'light';
-
             document.documentElement.setAttribute('data-theme', newTheme);
             localStorage.setItem('theme', newTheme);
         });

@@ -1,51 +1,58 @@
 import unicodedata
 
-# Comprehensive replacement map for Elizabethan to modern character substitutions
+# Updated replacement map that converts Elizabethan to modern English
 replacement_map = {
-    "Æ": "Ae", "æ": "ae",
+    "Æ": "ae", "æ": "ae",
     "ſ": "s",
     "ꝛ": "r",
-    "I": "J", "i": "j",
-    "V": "U", "v": "u",
-    "U": "V", "u": "v",
-    "Y": "Th", "y": "th",
-    "Þ": "Th", "þ": "th",
-    "Ð": "D", "ð": "d",
+    "j": "i",
+    "v": "u",
+    "th": "y",
+    "Þ": "th", "þ": "th",
+    "Ð": "d", "ð": "d",
     "ƿ": "w",
-    "Ƿ": "W",
+    "Ƿ": "w",
     "ꝣ": "d",
     "Ꝺ": "d",
-    "Ȝ": "Y", "ȝ": "y",
-    "Ç": "C", "ç": "c",
+    "Ȝ": "y", "ȝ": "y",
     "ß": "ss",
-    "Œ": "Oe", "œ": "oe",
+    "Œ": "oe", "œ": "oe",
     "Ꝋ": "o", "ꝋ": "o",
     "Ꝑ": "p", "ꝑ": "p",
     "Ꝙ": "q", "ꝙ": "q",
-    "ꝺ": "d",
-    "ȣ": "ou",
-    "Ā": "A", "ā": "a",
-    "Ē": "E", "ē": "e",
-    "Ī": "I", "ī": "i",
-    "Ō": "O", "ō": "o",
-    "Ū": "U", "ū": "u",
-    "Ȳ": "Y", "ȳ": "y",
+    "ꝺ": "d"
 }
 
+
 def normalize_text(text):
-    """
-    Normalizes the given text by applying Elizabethan-to-modern character substitutions
-    and removing diacritics.
-    """
-    if text:
-        # Normalize Unicode and remove diacritics
-        text = unicodedata.normalize('NFKD', text)
-        text = ''.join(c for c in text if not unicodedata.combining(c))  # Strip diacritics
+    if not text:
+        return text
 
-        # Apply replacements from the replacement map
-        for old, new in replacement_map.items():
-            text = text.replace(old, new)
+    # Convert to lowercase and remove diacritics
+    text = unicodedata.normalize('NFKD', text)
+    text = ''.join(c for c in text if not unicodedata.combining(c))
+    text = text.lower()
 
-        # Return normalized lowercase text
-        return text.lower()
+    # Character substitutions
+    text = text.replace('j', 'i')
+    text = text.replace('v', 'u')
+    text = text.replace('ye', 'the')
+    text = text.replace('æ', 'ae')
+
+    # Common spelling variations
+    text = text.replace('tragedie', 'tragedy')
+    text = text.replace('comedie', 'comedy')
+    text = text.replace('historie', 'history')
+    text = text.replace('ſ', 's')  # long s
+    text = text.replace('haviour', 'havior')
+    text = text.replace('honour', 'honor')
+    text = text.replace('labour', 'labor')
+    text = text.replace('griefe', 'grief')
+    text = text.replace('loue', 'love')
+    text = text.replace('publike', 'public')
+    text = text.replace('musicke', 'music')
+    text = text.replace('magicke', 'magic')
+    text = text.replace('worke', 'work')
+    text = text.replace('booke', 'book')
+
     return text
