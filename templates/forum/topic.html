@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <h1>{{ topic.title }}</h1>
+  <p>{{ topic.content }}</p>
+  <small>
+    by {{ topic.user.username }} 
+    on {{ topic.created_at.strftime('%Y-%m-%d') }}
+  </small>
+
+  <form action="{{ url_for('forum.follow', topic_id=topic.id) }}" method="post">
+    <button type="submit">Follow</button>
+  </form>
+
+  <h2>Replies</h2>
+  <ul>
+    {% for post in posts.items %}
+      <li>
+        <p>{{ post.content }}</p>
+        <small>
+          by {{ post.user.username }}
+          on {{ post.created_at.strftime('%Y-%m-%d') }}
+        </small>
+        <form action="{{ url_for('forum.like', post_id=post.id) }}" method="post">
+          <button type="submit">Like ({{ post.likes.count() }})</button>
+        </form>
+      </li>
+    {% endfor %}
+  </ul>
+
+  {% if posts.has_prev %}
+    <a href="{{ url_for('forum.topic', topic_id=topic.id, page=posts.prev_num) }}">
+      Previous
+    </a>
+  {% endif %}
+  {% if posts.has_next %}
+    <a href="{{ url_for('forum.topic', topic_id=topic.id, page=posts.next_num) }}">
+      Next
+    </a>
+  {% endif %}
+
+  <h2>Reply</h2>
+  <form method="post">
+    {{ form.hidden_tag() }}
+    <div>
+      {{ form.content.label }}
+      {{ form.content(rows=4, cols=50) }}
+    </div>
+    {{ form.submit() }}
+  </form>
+{% endblock %}

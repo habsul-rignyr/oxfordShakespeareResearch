@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="forum-container">
+    <div class="category-header">
+        <h1>{{ category.name }}</h1>
+        <p>{{ category.description }}</p>
+        <a href="{{ url_for('forum.new_topic') }}" class="btn-primary">New Topic</a>
+    </div>
+
+    <div class="topics-list">
+        {% if topics.items %}
+            {% for topic in topics.items %}
+                <div class="topic-item">
+                    <div class="topic-main">
+                        <h3>
+                            <a href="{{ url_for('forum.topic', topic_id=topic.id) }}">{{ topic.title }}</a>
+                        </h3>
+                        <div class="topic-meta">
+                            Posted by {{ topic.user.username }}
+                            on {{ topic.created_at.strftime('%Y-%m-%d') }}
+                            {% if topic.updated_at and topic.updated_at != topic.created_at %}
+                                (Updated: {{ topic.updated_at.strftime('%Y-%m-%d') }})
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="topic-stats">
+                        <span>{{ topic.posts.count() - 1 }} replies</span>
+                    </div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <p>No topics yet in this category. Be the first to create one!</p>
+        {% endif %}
+    </div>
+
+    <div class="pagination">
+        {% if topics.has_prev %}
+            <a href="{{ url_for('forum.category', category_id=category.id, page=topics.prev_num) }}"
+               class="btn-secondary">Previous</a>
+        {% endif %}
+
+        {% if topics.has_next %}
+            <a href="{{ url_for('forum.category', category_id=category.id, page=topics.next_num) }}"
+               class="btn-secondary">Next</a>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="auth-container">
+    <h1>Add Email Address</h1>
+
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            {% for message in messages %}
+                <div class="flash-message">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <p class="email-info">
+        Adding an email address enables:
+        <ul>
+            <li>Comment notifications</li>
+            <li>Updates about Shakespeare research</li>
+            <li>Account recovery</li>
+        </ul>
+    </p>
+
+    <form method="POST" action="{{ url_for('add_email') }}">
+        <div class="form-group">
+            <label for="email">Email Address</label>
+            <input type="email" id="email" name="email" required>
+        </div>
+
+        <button type="submit" class="btn-primary">Add Email</button>
+    </form>
+
+    <div class="auth-link">
+        <p>Want to skip for now? <a href="{{ url_for('profile') }}">Go to Profile</a></p>
+    </div>
+</div>
+
+{% endblock %}

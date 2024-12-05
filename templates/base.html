@@ -12,19 +12,20 @@
             <a href="{{ url_for('home') }}" class="nav-link">Home</a>
             <a href="{{ url_for('search') }}" class="nav-link">Search</a>
             <a href="{{ url_for('blog_index') }}" class="nav-link">Blog</a>
+            <a href="{{ url_for('forum.index') }}" class="nav-link">Forum</a>
         </div>
         <div class="nav-right">
-    <button id="theme-toggle" class="theme-toggle">
-        <span class="light-icon">☀️</span>
-        <span class="dark-icon">🌙</span>
-    </button>
-    {% if session.get('user_id') %}
-        <a href="{{ url_for('profile') }}" class="nav-link">Profile</a>
-        <a href="{{ url_for('logout') }}" class="nav-link">Logout</a>
-    {% else %}
-        <a href="{{ url_for('login') }}" class="nav-link">Login</a>
-    {% endif %}
-</div>
+            <button id="theme-toggle" class="theme-toggle">
+                <span class="light-icon">☀️</span>
+                <span class="dark-icon">🌙</span>
+            </button>
+            {% if session.get('user_id') %}
+            <a href="{{ url_for('profile') }}" class="nav-link">Profile</a>
+            <a href="{{ url_for('logout') }}" class="nav-link">Logout</a>
+            {% else %}
+            <a href="{{ url_for('login') }}" class="nav-link">Login</a>
+            {% endif %}
+        </div>
     </nav>
     <div class="content">
         {% block content %}

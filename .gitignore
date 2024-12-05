@@ -11,3 +11,13 @@ __pycache__/
 
 # IDE settings (optional, e.g., PyCharm)
 .idea/
+
+# Config files
+config.py
+instance/
+*.cfg
+*.conf
+
+# Environment variables
+.env
+.env.*

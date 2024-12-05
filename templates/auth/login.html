@@ -1,35 +1,55 @@
-{% extends "base.html" %}
-
-{% block title %}Login - Shakespeare Authorship Project{% endblock %}
-
-{% block content %}
+{% extends "base.html" %} {% block content %}
 
 <div class="auth-container">
-    <h1>Login</h1>
+  <h1>Login</h1>
 
-    {% with messages = get_flashed_messages() %}
-        {% if messages %}
-            {% for message in messages %}
-                <div class="flash-message">{{ message }}</div>
-            {% endfor %}
-        {% endif %}
-    {% endwith %}
+  {% with messages = get_flashed_messages() %}
+    {% if messages %}
+      {% for message in messages %}
+        <div class="flash-message">{{ message }}</div>
+      {% endfor %}
+    {% endif %}
+  {% endwith %}
 
-    <form method="POST">
-        <div class="form-group">
-            <label for="username">Username</label>
-            <input type="text" id="username" name="username" required>
-        </div>
+  {% if session.get('pending_oauth') %}
+    <div class="oauth-link-message">
+      An account already exists with this email. Login to link your {{ session.pending_oauth.provider }} account.
+      <img src="{{ session.pending_oauth.avatar }}" alt="OAuth Avatar" class="oauth-avatar">
+      {{ session.pending_oauth.username }}
+    </div>
+  {% endif %}
 
-        <div class="form-group">
-            <label for="password">Password</label>
-            <input type="password" id="password" name="password" required>
-        </div>
+  <form action="{{ url_for('login') }}" method="post">
+    <div class="form-group">
+      <label for="username">Username</label>
+      <input type="text" id="username" name="username" required>
+    </div>
 
-        <button type="submit" class="btn-primary">Login</button>
-    </form>
+    <div class="form-group">
+      <label for="password">Password</label>
+      <input type="password" id="password" name="password" required>
+    </div>
 
-    <p class="auth-link">Don't have an account? <a href="{{ url_for('register') }}">Register here</a></p>
+    <button type="submit" class="btn-primary">Login</button>
+  </form>
+
+  {% if not session.get('pending_oauth') %}
+    <div class="social-login">
+      <p>Or login with:</p>
+      <div class="social-buttons">
+        <a href="{{ url_for('oauth_login', provider='google') }}" class="btn-social google">
+          Google
+        </a>
+        <a href="{{ url_for('oauth_login', provider='twitter') }}" class="btn-social twitter">
+          Twitter
+        </a>
+      </div>
+    </div>
+  {% endif %}
+
+  <div class="auth-link">
+    Don't have an account? <a href="{{ url_for('register') }}">Register</a>
+  </div>
 </div>
 
 {% endblock %}

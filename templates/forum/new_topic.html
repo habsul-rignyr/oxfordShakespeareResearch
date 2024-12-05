@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <h1>New Topic</h1>
+  <form method="post">
+    {{ form.hidden_tag() }}
+    <div>
+      {{ form.title.label }}
+      {{ form.title(size=50) }}
+    </div>
+    <div>
+      {{ form.content.label }}
+      {{ form.content(rows=4, cols=50) }}
+    </div>
+    <div>
+      {{ form.category.label }}
+      {{ form.category }}
+    </div>
+    {{ form.submit() }}
+  </form>
+{% endblock %}

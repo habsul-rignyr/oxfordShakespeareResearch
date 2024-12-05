@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="auth-container">
+    <h1>Link Account</h1>
+
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            {% for message in messages %}
+                <div class="flash-message">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    {% if session.get('pending_oauth') %}
+        <div class="oauth-link-message">
+            <p>Link your account with {{ session.pending_oauth.provider | title }}?</p>
+            <img src="{{ session.pending_oauth.avatar }}" alt="OAuth Avatar" class="oauth-avatar">
+            <p>{{ session.pending_oauth.username }}</p>
+        </div>
+
+        <div class="oauth-link-actions">
+            <form action="{{ url_for('link_oauth') }}" method="POST">
+                <button type="submit" class="btn-oauth-link">
+                    Link with {{ session.pending_oauth.provider | title }}
+                </button>
+            </form>
+            <a href="{{ url_for('cancel_oauth_link') }}" class="btn-oauth-cancel">Cancel Linking</a>
+        </div>
+    {% else %}
+        <p>No pending OAuth link request.</p>
+        <a href="{{ url_for('profile') }}" class="btn-primary">Back to Profile</a>
+    {% endif %}
+</div>
+
+{% endblock %}
