@@ -1,12 +1,12 @@
 /* Import other CSS files */
-@import 'themes.css';
-@import 'fonts.css';
-@import 'layout.css';
-@import 'forms.css';
-@import 'forum.css';
-@import 'blog.css';
-@import 'auth.css';
-@import 'profile.css';
+@import 'themes.css?v=1';
+@import 'fonts.css?v=1';
+@import 'layout.css?v=1';
+@import 'forms.css?v=1';
+@import 'forum.css?v=1';  /* Added version parameter */
+@import 'blog.css?v=1';
+@import 'auth.css?v=1';
+@import 'profile.css?v=1';
 
 /* Base styles */
 body {

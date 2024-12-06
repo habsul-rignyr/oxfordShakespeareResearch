@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="forum-container">
+    <h1>Edit Reply</h1>
+    
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            {% for message in messages %}
+                <div class="flash-message">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+    
+    <form method="post">
+        {{ form.hidden_tag() }}
+        <div class="form-group">
+            {{ form.content.label }}
+            {{ form.content(class="form-control", id="editor") }}
+        </div>
+        {{ form.submit(class="btn-primary") }}
+        <a href="{{ url_for('forum.topic', topic_id=post.topic_id) }}" class="btn-secondary">Cancel</a>
+    </form>
+</div>
+
+<script>
+    ClassicEditor
+        .create(document.querySelector('#editor'), {
+            toolbar: ['heading', '|', 'bold', 'italic', 'link', 'bulletedList', 'numberedList', 'blockQuote'],
+            placeholder: 'Enter your content here...'
+        })
+        .catch(error => {
+            console.error(error);
+        });
+</script>
+{% endblock %}

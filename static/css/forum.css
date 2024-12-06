@@ -6,10 +6,10 @@
 }
 
 .forum-content {
-    font-family: 'JetBrains Mono', monospace;
-    line-height: 1.3;  /* Reduced from 1.6 */
-    margin: 0.5rem 0;  /* Reduced from 1rem */
-    font-size: 0.9em;  /* Slightly smaller font */
+    font-family: 'JetBrains Mono', monospace !important;
+    line-height: 1.2 !important;
+    margin: 0.3rem 0 !important;
+    font-size: 0.85em !important;
 }
 
 .forum-header {
@@ -51,19 +51,19 @@
 /* Topic and Post styles */
 .topic-branch, .post-branch {
     position: relative;
-    margin-bottom: 0.75rem;  /* Reduced spacing between posts */
-    padding-left: 2rem;  /* Add padding for collapse button */
+    margin-bottom: 0.5rem;
+    padding-left: 2rem;
 }
 
 .topic-header {
-    margin-bottom: 1.5rem;  /* Reduced from 2rem */
+    margin-bottom: 1rem;
 }
 
 .topic-header-main {
     display: flex;
     align-items: baseline;
     gap: 1rem;
-    padding-left: 0.5rem;  /* Give some space after collapse button */
+    padding-left: 0.5rem;
 }
 
 .topic-header-main h1 {
@@ -73,18 +73,18 @@
 
 .topic-meta, .post-meta {
     color: var(--stage-direction-color);
-    font-size: 0.9em;
+    font-size: 0.85em;
 }
 
 .post-wrapper {
     background-color: var(--nav-bg);
-    padding: 0.75rem;      /* Reduced padding */
+    padding: 0.5rem;
     border-radius: 4px;
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.3rem;
 }
 
 .post-header {
-    margin-bottom: 0.25rem;  /* Reduced spacing */
+    margin-bottom: 0.2rem;
 }
 
 .post-branch {
@@ -94,7 +94,7 @@
 .post-tree::before {
     content: '';
     position: absolute;
-    left: 0.5rem;        /* Adjusted to align with new structure */
+    left: 0.5rem;
     top: 0;
     bottom: 0;
     width: 2px;
@@ -103,8 +103,8 @@
 
 .post-collapse-btn {
     position: absolute;
-    left: 0;            /* Adjusted from -1.5rem */
-    top: 0.5rem;       /* Center with title */
+    left: 0;
+    top: 0.5rem;
     cursor: pointer;
     background: none;
     border: none;
@@ -113,24 +113,27 @@
     font-family: 'JetBrains Mono', monospace;
 }
 
-
 .post-actions {
+    display: flex;
+    align-items: center;
     gap: 0.5rem;
-    margin-top: 0.25rem;    /* Reduced spacing */
-    padding-top: 0.25rem;
+    margin-top: 0.2rem;
+    padding-top: 0.2rem;
+    border-top: 1px solid var(--nav-border);
 }
 
 .post-action {
-    display: flex;
+    display: inline-flex;
     align-items: center;
     gap: 0.25rem;
     color: var(--stage-direction-color);
     cursor: pointer;
-    font-size: 0.9em;
+    font-size: 0.85em;
     background: none;
     border: none;
     padding: 2px 5px;
     border-radius: 3px;
+    text-decoration: none;
 }
 
 .post-action:hover {
@@ -139,7 +142,10 @@
 }
 
 .post-content {
-    margin: 0.5rem 0;     /* Reduced margins */
+    margin: 0.3rem 0;
+    font-family: 'JetBrains Mono', monospace !important;
+    line-height: 1.2 !important;
+    font-size: 0.85em !important;
 }
 
 .collapsed > .post-wrapper > .post-content,
@@ -161,16 +167,25 @@
 }
 
 .reply-form-container {
-    margin: 1rem 0;
-    padding: 1rem;
+    margin: 0.75rem 0;
+    padding: 0.75rem;
     background-color: var(--nav-bg);
     border-radius: 4px;
+}
+
+/* CKEditor overrides */
+.ck-editor__editable {
+    font-family: 'JetBrains Mono', monospace !important;
+    font-size: 0.85em !important;
+    line-height: 1.2 !important;
+    min-height: 150px;
 }
 
 .saved-indicator {
     color: #ffd700;
 }
 
+/* The rest of your existing styles */
 .category-title {
     margin-bottom: 1.5rem;
 }
@@ -213,14 +228,9 @@
     color: var(--link-hover);
 }
 
-.topic-meta {
-    color: var(--stage-direction-color);
-    font-size: 0.9em;
-}
-
 .topic-stats {
     color: var(--stage-direction-color);
-    font-size: 0.9em;
+    font-size: 0.85em;
     padding-left: 1.5rem;
 }
 
@@ -238,4 +248,24 @@
     justify-content: center;
     gap: 1rem;
     margin-top: 2rem;
+}
+
+.topic-reply-container {
+    position: relative;
+    margin-left: 2rem;
+    padding-left: 0.5rem;
+}
+
+.topic-reply-container::before {
+    content: '';
+    position: absolute;
+    left: -1.5rem;
+    top: -0.5rem;
+    bottom: 0;
+    width: 2px;
+    background-color: var(--nav-border);
+}
+
+.post-tree::before {
+    left: -1.5rem;
 }

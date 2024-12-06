@@ -18,8 +18,30 @@
             <div class="forum-content post-content">
                 {{ topic.content|safe }}
             </div>
+            {% if session.get('user_id') == topic.user_id %}
+                <div class="post-actions">
+                    <a href="{{ url_for('forum.edit_topic', topic_id=topic.id) }}" class="post-action">
+                        <i data-feather="edit"></i> Edit Topic
+                    </a>
+                </div>
+            {% endif %}
         </div>
     </div>
+
+    {% if session.get('user_id') %}
+        <div class="topic-reply-container">
+            <div class="reply-form-container main-reply-form">
+                <h3>Reply to Topic</h3>
+                <form method="post" action="{{ url_for('forum.topic', topic_id=topic.id) }}">
+                    {{ form.hidden_tag() }}
+                    <div class="form-group">
+                        {{ form.content(class="editor", id="editor-main") }}
+                    </div>
+                    {{ form.submit(class="btn-primary") }}
+                </form>
+            </div>
+        </div>
+    {% endif %}
 
     {% macro render_post(post, depth=0) %}
         <div class="post-branch {% if depth > 0 %}post-tree{% endif %}" data-post-id="{{ post.id }}">
@@ -38,9 +60,11 @@
                     {{ post.content|safe }}
                 </div>
                 <div class="post-actions">
-                    <button class="post-action reply-btn" onclick="showReplyForm('{{ post.id }}')">
+                    {% if session.get('user_id') %}
+                    <button class="post-action reply-btn" onclick="toggleReplyForm('{{ post.id }}')">
                         <i data-feather="reply"></i> Reply
                     </button>
+                    {% endif %}
                     <button class="post-action" onclick="sharePost('{{ post.id }}')">
                         <i data-feather="share-2"></i> Share
                     </button>
@@ -59,15 +83,15 @@
                 <form method="post" action="{{ url_for('forum.reply_to_post', post_id=post.id) }}">
                     {{ form.hidden_tag() }}
                     <div class="form-group">
-                        {{ form.content(class="form-control", id="editor-" ~ post.id) }}
+                        {{ form.content(class="editor", id="editor-" ~ post.id) }}
                     </div>
                     {{ form.submit(class="btn-primary") }}
-                    <button type="button" class="btn-secondary" onclick="hideReplyForm('{{ post.id }}')">Cancel</button>
+                    <button type="button" class="btn-secondary" onclick="toggleReplyForm('{{ post.id }}')">Cancel</button>
                 </form>
             </div>
 
             {% if post.replies.count() > 0 %}
-                {% for reply in post.replies.order_by(Post.created_at.asc()) %}
+                {% for reply in post.replies %}
                     {{ render_post(reply, depth + 1) }}
                 {% endfor %}
             {% endif %}
@@ -91,7 +115,47 @@
 </div>
 
 <script>
-    feather.replace();
+if (typeof ClassicEditor !== 'undefined') {
+    // Store editor instances
+    const editors = new Map();
+
+    async function createEditor(elementId) {
+        // If an editor already exists for this element, destroy it
+        if (editors.has(elementId)) {
+            await editors.get(elementId).destroy();
+            editors.delete(elementId);
+        }
+
+        try {
+            const element = document.getElementById(elementId);
+            if (!element) {
+                console.error(`Element not found: ${elementId}`);
+                return null;
+            }
+
+            const editor = await ClassicEditor.create(element, {
+                toolbar: [
+                    'heading',
+                    '|',
+                    'bold',
+                    'italic',
+                    'link',
+                    'bulletedList',
+                    'numberedList',
+                    'blockQuote',
+                    'undo',
+                    'redo'
+                ],
+                placeholder: 'Type your reply here...'
+            });
+
+            editors.set(elementId, editor);
+            return editor;
+        } catch (error) {
+            console.error('Editor creation failed:', error);
+            return null;
+        }
+    }
 
     function toggleCollapse(button) {
         const branch = button.closest('.post-branch, .topic-branch');
@@ -99,28 +163,28 @@
         button.textContent = branch.classList.contains('collapsed') ? '[+]' : '[-]';
     }
 
-    function showReplyForm(postId) {
-        document.querySelectorAll('.reply-form-container').forEach(container => {
-            container.style.display = 'none';
-        });
+    async function toggleReplyForm(postId) {
         const container = document.getElementById(`reply-form-${postId}`);
-        container.style.display = 'block';
+        if (!container) return;
 
-        if (!container.hasEditor) {
-            ClassicEditor
-                .create(document.querySelector(`#editor-${postId}`), {
-                    toolbar: ['heading', '|', 'bold', 'italic', 'link', 'bulletedList', 'numberedList', 'blockQuote'],
-                })
-                .catch(error => console.error(error));
-            container.hasEditor = true;
+        const isHidden = container.style.display === 'none';
+
+        // Hide all reply forms first (except main form)
+        document.querySelectorAll('.reply-form-container').forEach(form => {
+            if (!form.classList.contains('main-reply-form')) {
+                form.style.display = 'none';
+            }
+        });
+
+        // Toggle the clicked form
+        container.style.display = isHidden ? 'block' : 'none';
+
+        // Initialize editor if showing the form
+        if (isHidden) {
+            const editorId = `editor-${postId}`;
+            await createEditor(editorId);
         }
     }
-
-    function hideReplyForm(postId) {
-        const container = document.getElementById(`reply-form-${postId}`);
-        container.style.display = 'none';
-    }
-
 
     function sharePost(postId) {
         const popup = document.getElementById('share-popup');
@@ -149,11 +213,14 @@
         }
     }
 
-    // Initialize any CKEditor instances that exist on page load
-    document.querySelectorAll('[id^="editor-"]').forEach(editor => {
-        ClassicEditor
-            .create(editor)
-            .catch(error => console.error(error));
+    // Initialize main editor when the page loads
+    document.addEventListener('DOMContentLoaded', function() {
+        createEditor('editor-main');
+        feather.replace();
     });
+
+} else {
+    console.error('CKEditor not loaded! Please check your script includes.');
+}
 </script>
 {% endblock %}

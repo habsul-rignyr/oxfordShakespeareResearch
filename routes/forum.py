@@ -8,7 +8,6 @@ from datetime import datetime
 forum = Blueprint('forum', __name__, url_prefix='/forum')
 
 
-# We'll need to wrap the blueprint routes with the decorator after registration
 def init_forum_routes(app):
     @forum.route('/category/new', methods=['GET', 'POST'])
     @app.login_required
@@ -89,6 +88,7 @@ def init_forum_routes(app):
     @forum.route('/category/<int:category_id>')
     def category(category_id):
         category = Category.query.get_or_404(category_id)
+        page = request.args.get('page', 1, type=int)
         topics = Topic.query.filter_by(category_id=category_id).order_by(Topic.updated_at.desc()).paginate(per_page=20)
         return render_template('forum/category.html', category=category, topics=topics)
 
@@ -114,7 +114,7 @@ def init_forum_routes(app):
         if page == -1:
             page = (topic.posts.count() - 1) // 20 + 1
         posts = topic.posts.order_by(Post.created_at.asc()).paginate(page=page, per_page=20)
-        return render_template('forum/topic.html', topic=topic, posts=posts, form=form)
+        return render_template('forum/topic.html', topic=topic, posts=posts, form=form, Post=Post)
 
     @forum.route('/topic/<int:topic_id>/edit', methods=['GET', 'POST'])
     @app.login_required

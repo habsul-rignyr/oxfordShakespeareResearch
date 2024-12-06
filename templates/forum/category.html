@@ -25,7 +25,8 @@
                         </div>
                     </div>
                     <div class="topic-stats">
-                        <span>{{ topic.posts.count() - 1 }} replies</span>
+                        {% set reply_count = topic.posts.count() %}
+                        <span>{{ reply_count - 1 if reply_count > 0 else 0 }} {{ 'reply' if reply_count <= 2 else 'replies' }}</span>
                     </div>
                 </div>
             {% endfor %}
