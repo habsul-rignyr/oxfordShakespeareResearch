@@ -1,0 +1,36 @@
+/* profile.css */
+.profile-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+.profile-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
+.profile-avatar {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-right: 2rem;
+}
+
+.profile-content {
+    max-width: 600px;
+}
+
+.profile-bio {
+    margin-bottom: 1rem;
+}
+
+.profile-links {
+    margin-bottom: 1rem;
+}
+
+.profile-links a {
+    margin-right: 1rem;
+}

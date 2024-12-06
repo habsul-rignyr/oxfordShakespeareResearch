@@ -1,0 +1,33 @@
+/* responsive.css */
+@media (max-width: 480px) {
+    .navbar {
+        padding: 1em;
+    }
+
+    .nav-left, .nav-right {
+        gap: 1em;
+    }
+
+    .profile-header {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .profile-avatar {
+        margin-right: 0;
+        margin-bottom: 1rem;
+    }
+
+    .forum-container {
+        padding: 10px;
+    }
+
+    .category-card {
+        flex-direction: column;
+    }
+
+    .category-stats {
+        text-align: left;
+        margin-top: 1rem;
+    }
+}

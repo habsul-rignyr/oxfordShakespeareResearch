@@ -1,0 +1,44 @@
+/* blog.css */
+.blog-index {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+.blog-preview {
+    margin-bottom: 3rem;
+    padding-bottom: 2rem;
+    border-bottom: 1px solid var(--nav-border);
+}
+
+.blog-post {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+.post-header {
+    margin-bottom: 2rem;
+    text-align: center;
+}
+
+.post-header-image {
+    width: 100%;
+    max-height: 400px;
+    object-fit: cover;
+    margin-bottom: 1rem;
+    border-radius: 4px;
+}
+
+.post-metadata {
+    font-family: 'IM Fell Italic', serif;
+    color: var(--stage-direction-color);
+    font-size: 0.9em;
+    margin-bottom: 1rem;
+}
+
+.post-content {
+    font-size: 1.1em;
+    line-height: 1.8;
+    margin-bottom: 3rem;
+}

@@ -1,51 +1,159 @@
 {% extends 'base.html' %}
 
 {% block content %}
-  <h1>{{ topic.title }}</h1>
-  <p>{{ topic.content }}</p>
-  <small>
-    by {{ topic.user.username }} 
-    on {{ topic.created_at.strftime('%Y-%m-%d') }}
-  </small>
-
-  <form action="{{ url_for('forum.follow', topic_id=topic.id) }}" method="post">
-    <button type="submit">Follow</button>
-  </form>
-
-  <h2>Replies</h2>
-  <ul>
-    {% for post in posts.items %}
-      <li>
-        <p>{{ post.content }}</p>
-        <small>
-          by {{ post.user.username }}
-          on {{ post.created_at.strftime('%Y-%m-%d') }}
-        </small>
-        <form action="{{ url_for('forum.like', post_id=post.id) }}" method="post">
-          <button type="submit">Like ({{ post.likes.count() }})</button>
-        </form>
-      </li>
-    {% endfor %}
-  </ul>
-
-  {% if posts.has_prev %}
-    <a href="{{ url_for('forum.topic', topic_id=topic.id, page=posts.prev_num) }}">
-      Previous
-    </a>
-  {% endif %}
-  {% if posts.has_next %}
-    <a href="{{ url_for('forum.topic', topic_id=topic.id, page=posts.next_num) }}">
-      Next
-    </a>
-  {% endif %}
-
-  <h2>Reply</h2>
-  <form method="post">
-    {{ form.hidden_tag() }}
-    <div>
-      {{ form.content.label }}
-      {{ form.content(rows=4, cols=50) }}
+<div class="forum-container">
+    <div class="topic-branch" data-post-id="topic-{{ topic.id }}">
+        <button class="post-collapse-btn" onclick="toggleCollapse(this)">[-]</button>
+        <div class="topic-header">
+            <div class="topic-header-main">
+                <h1>{{ topic.title }}</h1>
+                <div class="topic-meta">
+                    posted by {{ topic.user.username }}
+                    on {{ topic.created_at.strftime('%Y-%m-%d') }}
+                    {% if topic.updated_at and topic.updated_at != topic.created_at %}
+                        (Updated: {{ topic.updated_at.strftime('%Y-%m-%d') }})
+                    {% endif %}
+                </div>
+            </div>
+            <div class="forum-content post-content">
+                {{ topic.content|safe }}
+            </div>
+        </div>
     </div>
-    {{ form.submit() }}
-  </form>
+
+    {% macro render_post(post, depth=0) %}
+        <div class="post-branch {% if depth > 0 %}post-tree{% endif %}" data-post-id="{{ post.id }}">
+            <button class="post-collapse-btn" onclick="toggleCollapse(this)">[-]</button>
+            <div class="post-wrapper">
+                <div class="post-header">
+                    <span class="post-meta">
+                        {{ post.user.username }}
+                        on {{ post.created_at.strftime('%Y-%m-%d') }}
+                        {% if post.updated_at and post.updated_at != post.created_at %}
+                            (Updated: {{ post.updated_at.strftime('%Y-%m-%d') }})
+                        {% endif %}
+                    </span>
+                </div>
+                <div class="forum-content post-content">
+                    {{ post.content|safe }}
+                </div>
+                <div class="post-actions">
+                    <button class="post-action reply-btn" onclick="showReplyForm('{{ post.id }}')">
+                        <i data-feather="reply"></i> Reply
+                    </button>
+                    <button class="post-action" onclick="sharePost('{{ post.id }}')">
+                        <i data-feather="share-2"></i> Share
+                    </button>
+                    <button class="post-action" onclick="toggleSave('{{ post.id }}')">
+                        <i data-feather="bookmark"></i> Save
+                    </button>
+                    {% if session.get('user_id') == post.user_id %}
+                        <a href="{{ url_for('forum.edit_post', post_id=post.id) }}" class="post-action">
+                            <i data-feather="edit"></i> Edit
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="reply-form-container" id="reply-form-{{ post.id }}" style="display: none;">
+                <form method="post" action="{{ url_for('forum.reply_to_post', post_id=post.id) }}">
+                    {{ form.hidden_tag() }}
+                    <div class="form-group">
+                        {{ form.content(class="form-control", id="editor-" ~ post.id) }}
+                    </div>
+                    {{ form.submit(class="btn-primary") }}
+                    <button type="button" class="btn-secondary" onclick="hideReplyForm('{{ post.id }}')">Cancel</button>
+                </form>
+            </div>
+
+            {% if post.replies.count() > 0 %}
+                {% for reply in post.replies.order_by(Post.created_at.asc()) %}
+                    {{ render_post(reply, depth + 1) }}
+                {% endfor %}
+            {% endif %}
+        </div>
+    {% endmacro %}
+
+    <div class="replies-container">
+        {% for post in posts.items %}
+            {% if not post.parent_id %}
+                {{ render_post(post) }}
+            {% endif %}
+        {% endfor %}
+    </div>
+</div>
+
+<div id="share-popup" class="share-popup" style="display: none;">
+    <h3>Share Post</h3>
+    <input type="text" id="share-link" readonly>
+    <button onclick="copyShareLink()">Copy</button>
+    <button onclick="closeSharePopup()">Close</button>
+</div>
+
+<script>
+    feather.replace();
+
+    function toggleCollapse(button) {
+        const branch = button.closest('.post-branch, .topic-branch');
+        branch.classList.toggle('collapsed');
+        button.textContent = branch.classList.contains('collapsed') ? '[+]' : '[-]';
+    }
+
+    function showReplyForm(postId) {
+        document.querySelectorAll('.reply-form-container').forEach(container => {
+            container.style.display = 'none';
+        });
+        const container = document.getElementById(`reply-form-${postId}`);
+        container.style.display = 'block';
+
+        if (!container.hasEditor) {
+            ClassicEditor
+                .create(document.querySelector(`#editor-${postId}`), {
+                    toolbar: ['heading', '|', 'bold', 'italic', 'link', 'bulletedList', 'numberedList', 'blockQuote'],
+                })
+                .catch(error => console.error(error));
+            container.hasEditor = true;
+        }
+    }
+
+    function hideReplyForm(postId) {
+        const container = document.getElementById(`reply-form-${postId}`);
+        container.style.display = 'none';
+    }
+
+
+    function sharePost(postId) {
+        const popup = document.getElementById('share-popup');
+        const input = document.getElementById('share-link');
+        const url = `${window.location.origin}/forum/post/${postId}`;
+        input.value = url;
+        popup.style.display = 'block';
+    }
+
+    function copyShareLink() {
+        const input = document.getElementById('share-link');
+        input.select();
+        document.execCommand('copy');
+        alert('Link copied to clipboard!');
+    }
+
+    function closeSharePopup() {
+        document.getElementById('share-popup').style.display = 'none';
+    }
+
+    async function toggleSave(postId) {
+        const response = await fetch(`/forum/post/${postId}/save`, { method: 'POST' });
+        if (response.ok) {
+            const button = event.target.closest('.post-action');
+            button.classList.toggle('saved-indicator');
+        }
+    }
+
+    // Initialize any CKEditor instances that exist on page load
+    document.querySelectorAll('[id^="editor-"]').forEach(editor => {
+        ClassicEditor
+            .create(editor)
+            .catch(error => console.error(error));
+    });
+</script>
 {% endblock %}

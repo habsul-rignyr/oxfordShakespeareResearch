@@ -1,0 +1,40 @@
+/* Import other CSS files */
+@import 'themes.css';
+@import 'fonts.css';
+@import 'layout.css';
+@import 'forms.css';
+@import 'forum.css';
+@import 'blog.css';
+@import 'auth.css';
+@import 'profile.css';
+
+/* Base styles */
+body {
+    font-family: 'IM Fell Regular', serif;
+    font-size: 18px;
+    line-height: 1.6;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    transition: background-color 0.3s, color 0.3s;
+}
+
+a {
+    color: var(--link-color);
+    text-decoration: none;
+}
+
+a:hover {
+    color: var(--link-hover);
+}
+
+/* Content area */
+.content {
+    padding: 2em;
+}
+
+/* Responsive base styles */
+@media (max-width: 480px) {
+    .content {
+        padding: 1em;
+    }
+}

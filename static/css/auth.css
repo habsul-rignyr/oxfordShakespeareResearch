@@ -1,0 +1,48 @@
+/* auth.css */
+.auth-container {
+    max-width: 400px;
+    margin: 2rem auto;
+    padding: 2rem;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+}
+
+.auth-link {
+    margin-top: 1rem;
+    text-align: center;
+}
+
+.social-login {
+    margin-top: 2rem;
+    text-align: center;
+}
+
+.social-buttons {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    margin-top: 1rem;
+}
+
+.btn-social {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.8rem 1.2rem;
+    border-radius: 4px;
+    color: white;
+    text-decoration: none;
+    transition: opacity 0.2s;
+}
+
+.social-icon {
+    font-weight: bold;
+}
+
+.btn-social:hover {
+    opacity: 0.9;
+}
+
+.github { background: #333; }
+.google { background: #DB4437; }
+.twitter { background: #1DA1F2; }

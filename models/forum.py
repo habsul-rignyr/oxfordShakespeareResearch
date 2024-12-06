@@ -30,8 +30,18 @@ class Post(db.Model):
     updated_at = db.Column(db.DateTime, onupdate=datetime.utcnow)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     topic_id = db.Column(db.Integer, db.ForeignKey('topic.id'), nullable=False)
+    parent_id = db.Column(db.Integer, db.ForeignKey('post.id', name='fk_post_parent'), nullable=True)
     likes = db.relationship('PostLike', backref='post', lazy='dynamic')
+    replies = db.relationship('Post', backref=db.backref('parent', remote_side=[id]), lazy='dynamic')
+    # Add this line to create the saved_by relationship
+    saved_by = db.relationship('SavedPost', backref='post', lazy='dynamic')
 
+class SavedPost(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id', name='fk_savedpost_user'), nullable=False)
+    post_id = db.Column(db.Integer, db.ForeignKey('post.id', name='fk_savedpost_post'), nullable=False)
+    saved_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    notes = db.Column(db.Text)
 
 class PostLike(db.Model):
     id = db.Column(db.Integer, primary_key=True)

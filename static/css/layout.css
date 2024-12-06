@@ -1,0 +1,41 @@
+/* layout.css */
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1em 2em;
+    background-color: var(--nav-bg);
+    border-bottom: 1px solid var(--nav-border);
+    transition: background-color 0.3s;
+}
+
+.nav-left, .nav-right {
+    display: flex;
+    gap: 1.5em;
+    align-items: center;
+}
+
+.nav-link {
+    text-decoration: none;
+    color: var(--link-color);
+}
+
+.nav-link:hover {
+    color: var(--link-hover);
+}
+
+.theme-toggle {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0.5em;
+    font-size: 1.2em;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+:root[data-theme="light"] .dark-icon,
+:root[data-theme="dark"] .light-icon {
+    display: none;
+}

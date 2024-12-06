@@ -1,0 +1,28 @@
+/* themes.css */
+:root[data-theme="light"] {
+    --bg-color: #ffffff;
+    --text-color: #333333;
+    --nav-bg: #f8f8f8;
+    --nav-border: #ddd;
+    --link-color: #333;
+    --link-hover: #666;
+    --stage-direction-color: #666;
+    --button-bg: #f0f0f0;
+    --button-text: #333;
+    --search-border: #ddd;
+    --border-color: #ddd;
+}
+
+:root[data-theme="dark"] {
+    --bg-color: #1a1a1a;
+    --text-color: #e0e0e0;
+    --nav-bg: #2d2d2d;
+    --nav-border: #404040;
+    --link-color: #e0e0e0;
+    --link-hover: #ffffff;
+    --stage-direction-color: #b0b0b0;
+    --button-bg: #404040;
+    --button-text: #e0e0e0;
+    --search-border: #404040;
+    --border-color: #404040;
+}

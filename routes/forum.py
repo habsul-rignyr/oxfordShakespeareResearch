@@ -1,8 +1,9 @@
-from flask import Blueprint, render_template, request, redirect, url_for, flash, session
+from flask import Blueprint, render_template, request, redirect, url_for, flash, session, jsonify
 from models import db
 from models.user import User
-from models.forum import Category, Topic, Post, PostLike, TopicFollow
-from forms.forum import TopicForm, PostForm, CategoryForm
+from models.forum import Category, Topic, Post, PostLike, TopicFollow, SavedPost
+from forms.forum import TopicForm, PostForm, CategoryForm, EditTopicForm, EditPostForm
+from datetime import datetime
 
 forum = Blueprint('forum', __name__, url_prefix='/forum')
 
@@ -114,6 +115,93 @@ def init_forum_routes(app):
             page = (topic.posts.count() - 1) // 20 + 1
         posts = topic.posts.order_by(Post.created_at.asc()).paginate(page=page, per_page=20)
         return render_template('forum/topic.html', topic=topic, posts=posts, form=form)
+
+    @forum.route('/topic/<int:topic_id>/edit', methods=['GET', 'POST'])
+    @app.login_required
+    def edit_topic(topic_id):
+        topic = Topic.query.get_or_404(topic_id)
+        user = User.query.get(session['user_id'])
+
+        # Check if user is author or admin
+        if user.id != topic.user_id and not user.is_admin:
+            flash('You do not have permission to edit this topic')
+            return redirect(url_for('forum.topic', topic_id=topic.id))
+
+        form = EditTopicForm()
+        if request.method == 'GET':
+            form.title.data = topic.title
+            form.content.data = topic.content
+
+        if form.validate_on_submit():
+            topic.title = form.title.data
+            topic.content = form.content.data
+            topic.updated_at = datetime.utcnow()
+            db.session.commit()
+            flash('Topic updated successfully')
+            return redirect(url_for('forum.topic', topic_id=topic.id))
+
+        return render_template('forum/edit_topic.html', form=form, topic=topic)
+
+    @forum.route('/post/<int:post_id>/edit', methods=['GET', 'POST'])
+    @app.login_required
+    def edit_post(post_id):
+        post = Post.query.get_or_404(post_id)
+        user = User.query.get(session['user_id'])
+
+        # Check if user is author or admin
+        if user.id != post.user_id and not user.is_admin:
+            flash('You do not have permission to edit this post')
+            return redirect(url_for('forum.topic', topic_id=post.topic_id))
+
+        form = EditPostForm()
+        if request.method == 'GET':
+            form.content.data = post.content
+
+        if form.validate_on_submit():
+            post.content = form.content.data
+            post.updated_at = datetime.utcnow()
+            db.session.commit()
+            flash('Post updated successfully')
+            return redirect(url_for('forum.topic', topic_id=post.topic_id))
+
+        return render_template('forum/edit_post.html', form=form, post=post)
+
+    @forum.route('/post/<int:post_id>/reply', methods=['POST'])
+    @app.login_required
+    def reply_to_post(post_id):
+        parent_post = Post.query.get_or_404(post_id)
+        form = PostForm()
+
+        if form.validate_on_submit():
+            post = Post(
+                content=form.content.data,
+                topic_id=parent_post.topic_id,
+                user_id=session['user_id'],
+                parent_id=parent_post.id
+            )
+            db.session.add(post)
+            db.session.commit()
+            flash('Reply posted successfully')
+
+        return redirect(url_for('forum.topic', topic_id=parent_post.topic_id))
+
+    @forum.route('/post/<int:post_id>/save', methods=['POST'])
+    @app.login_required
+    def save_post(post_id):
+        post = Post.query.get_or_404(post_id)
+        user_id = session['user_id']
+
+        saved = SavedPost.query.filter_by(user_id=user_id, post_id=post_id).first()
+        if saved:
+            db.session.delete(saved)
+            message = 'Post removed from saved items'
+        else:
+            saved = SavedPost(user_id=user_id, post_id=post_id)
+            db.session.add(saved)
+            message = 'Post saved successfully'
+
+        db.session.commit()
+        return jsonify({'message': message}), 200
 
     @forum.context_processor
     def utility_processor():
