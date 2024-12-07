@@ -1,0 +1,51 @@
+/* EEBO Work Styles */
+.work-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 2rem 0;
+}
+
+.work-metadata {
+    background-color: var(--nav-bg);
+    border: 1px solid var(--nav-border);
+    border-radius: 8px;
+    padding: 1rem;
+    margin: 1rem 0 2rem 0;
+}
+
+.work-metadata p {
+    margin: 0.5rem 0;
+}
+
+.work-section {
+    margin: 2rem 0;
+}
+
+.work-section h2 {
+    font-size: 1.5em;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--nav-border);
+}
+
+.work-section h3 {
+    font-size: 1.2em;
+    margin: 1.5rem 0 1rem 0;
+}
+
+.work-content p {
+    margin: 1rem 0;
+    line-height: 1.6;
+}
+
+.note {
+    font-style: italic;
+    color: var(--stage-direction-color);
+    margin: 1rem 0;
+    padding-left: 1rem;
+    border-left: 2px solid var(--nav-border);
+}
+
+.highlight {
+    font-weight: bold;
+}

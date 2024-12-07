@@ -8,6 +8,7 @@
 @import 'auth.css?v=1';
 @import 'profile.css?v=1';
 @import 'play.css?v=1';
+@import 'work.css?v=1';
 
 /* Base styles */
 body {
@@ -227,4 +228,45 @@ a:hover {
     .content {
         padding: 1em;
     }
+}
+
+/* Add to your base.css or create a new work.css */
+.work-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+.work-metadata {
+    background-color: var(--nav-bg);
+    border: 1px solid var(--nav-border);
+    border-radius: 8px;
+    padding: 1rem;
+    margin: 1rem 0;
+}
+
+.work-metadata p {
+    margin: 0.5rem 0;
+}
+
+.work-content {
+    line-height: 1.6;
+}
+
+.work-section {
+    margin: 2rem 0;
+}
+
+.work-section h2 {
+    border-bottom: 1px solid var(--nav-border);
+    padding-bottom: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.note {
+    font-style: italic;
+    color: var(--stage-direction-color);
+    margin: 1rem 0;
+    padding-left: 1rem;
+    border-left: 2px solid var(--nav-border);
 }

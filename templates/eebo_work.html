@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="work-container">
+    <h1>{{ work.title }}</h1>
+    
+    <div class="work-metadata">
+        {% if work.author %}
+        <p><strong>Author:</strong> {{ work.author }}</p>
+        {% endif %}
+        {% if work.publication_year %}
+        <p><strong>Published:</strong> {{ work.publication_year }}</p>
+        {% endif %}
+        {% if work.tcp_id %}
+        <p><strong>TCP ID:</strong> {{ work.tcp_id }}</p>
+        {% endif %}
+    </div>
+
+    <div class="work-content">
+        {% for section_title, section_content in content %}
+            <div class="work-section">
+                <h2>{{ section_title }}</h2>
+                {% for type, text in section_content %}
+                    {% if type == 'paragraph' %}
+                        <p>{{ text }}</p>
+                    {% elif type == 'heading' %}
+                        <h3>{{ text }}</h3>
+                    {% elif type == 'linebreak' %}
+                        <br>
+                    {% elif type == 'note' %}
+                        <div class="note">{{ text }}</div>
+                    {% elif type == 'highlight' %}
+                        <span class="highlight">{{ text }}</span>
+                    {% endif %}
+                {% endfor %}
+            </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

@@ -1,5 +1,6 @@
 import os
 import re
+import html
 from xml.etree import ElementTree as ET
 from flask import render_template, request, abort
 from models import db
@@ -8,7 +9,7 @@ from models.blog import BlogPost
 from models.forum import Topic
 from normalization import normalize_text
 from rapidfuzz.fuzz import partial_ratio, token_set_ratio
-import html
+
 
 def strip_html_tags(text):
     """Remove HTML tags and decode HTML entities from text"""
@@ -77,37 +78,103 @@ def register_routes(app):
 
     @app.route('/play/<int:work_id>')
     def render_play(work_id):
-        work = Work.query.get(work_id)
-        if not work:
-            abort(404, description="Play not found")
-
+        work = Work.query.get_or_404(work_id)
         if not os.path.exists(work.file_path):
-            abort(404, description="Play file not found")
+            abort(404, description="File not found")
 
         try:
             tree = ET.parse(work.file_path)
             root = tree.getroot()
 
-            title_element = root.find('.//title')
-            if title_element is not None:
-                title_parts = []
-                for part in title_element.itertext():
-                    title_parts.append(part.strip())
-                play_title = ' '.join(title_parts)
+            if work.collection == 'EEBO-TCP':
+                content = process_eebo_content(root)
+                return render_template("eebo_work.html",
+                                       work=work,
+                                       content=content)
             else:
-                play_title = work.title
+                # Original play processing logic
+                title_element = root.find('.//title')
+                if title_element is not None:
+                    title_parts = []
+                    for part in title_element.itertext():
+                        title_parts.append(part.strip())
+                    play_title = ' '.join(title_parts)
+                else:
+                    play_title = work.title
 
-            character_mappings = get_character_mappings(root)
-            acts = process_acts(root)
+                character_mappings = get_character_mappings(root)
+                acts = process_acts(root)
 
-            return render_template("play.html",
-                                   work=work,
-                                   play_title=play_title,
-                                   acts=acts,
-                                   character_mappings=character_mappings)
+                return render_template("play.html",
+                                       work=work,
+                                       play_title=play_title,
+                                       acts=acts,
+                                       character_mappings=character_mappings)
 
         except ET.ParseError:
-            abort(500, description="Error parsing the play file")
+            abort(500, description="Error parsing file")
+
+
+def process_eebo_content(root):
+    """Process EEBO-TCP XML content into displayable sections."""
+    content = []
+
+    # Find the text element with namespace
+    text_elem = root.find('.//{http://www.tei-c.org/ns/1.0}text')
+    if text_elem is None:
+        return content
+
+    # Process front matter
+    front = text_elem.find('.//{http://www.tei-c.org/ns/1.0}front')
+    if front is not None:
+        front_content = process_eebo_section(front)
+        if front_content:
+            content.append(('Front Matter', front_content))
+
+    # Process main body
+    body = text_elem.find('.//{http://www.tei-c.org/ns/1.0}body')
+    if body is not None:
+        body_content = process_eebo_section(body)
+        if body_content:
+            content.append(('Main Text', body_content))
+
+    # Process back matter
+    back = text_elem.find('.//{http://www.tei-c.org/ns/1.0}back')
+    if back is not None:
+        back_content = process_eebo_section(back)
+        if back_content:
+            content.append(('Back Matter', back_content))
+
+    return content
+
+
+def process_eebo_section(section):
+    """Process a section of EEBO-TCP XML into formatted text."""
+    content = []
+
+    for elem in section.iter():
+        tag = elem.tag.split('}')[-1]  # Remove namespace
+
+        if tag == 'p':  # Paragraph
+            text = ' '.join(elem.itertext()).strip()
+            if text:
+                content.append(('paragraph', text))
+        elif tag == 'head':  # Heading
+            text = ' '.join(elem.itertext()).strip()
+            if text:
+                content.append(('heading', text))
+        elif tag == 'lb':  # Line break
+            content.append(('linebreak', None))
+        elif tag == 'note':  # Notes
+            text = ' '.join(elem.itertext()).strip()
+            if text:
+                content.append(('note', text))
+        elif tag == 'hi':  # Highlighted text
+            text = ' '.join(elem.itertext()).strip()
+            if text:
+                content.append(('highlight', text))
+
+    return content
 
 
 def get_character_mappings(root):
