@@ -1,16 +1,49 @@
 import os
+import re
 from xml.etree import ElementTree as ET
 from flask import render_template, request, abort
 from models import db
 from models.work import Work
+from models.blog import BlogPost
+from models.forum import Topic
 from normalization import normalize_text
 from rapidfuzz.fuzz import partial_ratio, token_set_ratio
+import html
+
+def strip_html_tags(text):
+    """Remove HTML tags and decode HTML entities from text"""
+    if not text:
+        return ""
+    # First remove HTML tags
+    clean_text = re.compile('<.*?>').sub(' ', text)
+    # Decode HTML entities like &nbsp; &quot; etc.
+    clean_text = html.unescape(clean_text)
+    # Replace multiple spaces with single space
+    clean_text = ' '.join(clean_text.split())
+    return clean_text
 
 
 def register_routes(app):
     @app.route('/')
     def home():
-        return render_template("home.html")
+        # Get the 3 most recent blog posts
+        recent_posts = BlogPost.query.filter_by(published=True) \
+            .order_by(BlogPost.created_at.desc()) \
+            .limit(3).all()
+
+        # Get the 3 most recent forum topics
+        recent_topics = Topic.query.order_by(Topic.created_at.desc()) \
+            .limit(3).all()
+
+        # Clean the forum content
+        for topic in recent_topics:
+            topic.clean_content = strip_html_tags(topic.content)
+            if len(topic.clean_content) > 150:
+                topic.clean_content = topic.clean_content[:150] + "..."
+
+        return render_template("home.html",
+                               recent_posts=recent_posts,
+                               recent_topics=recent_topics)
 
     @app.route('/search')
     def search():

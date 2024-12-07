@@ -1,0 +1,150 @@
+/* home.css */
+.home-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+.home-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    margin: 2rem 0;
+}
+
+.recent-section {
+    background-color: var(--nav-bg);
+    padding: 1.5rem;
+    border-radius: 8px;
+    border: 1px solid var(--nav-border);
+}
+
+.recent-section h2 {
+    margin-top: 0;
+    margin-bottom: 1.5rem;
+    color: var(--text-color);
+}
+
+.content-card {
+    margin-bottom: 1.5rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid var(--nav-border);
+}
+
+.content-card:last-child {
+    margin-bottom: 0;
+    padding-bottom: 0;
+    border-bottom: none;
+}
+
+.content-card h3 {
+    margin: 0 0 0.5rem 0;
+    font-family: 'IM Fell Regular', serif;
+}
+
+.content-card h3 a {
+    color: var(--text-color);
+    text-decoration: none;
+}
+
+.content-card h3 a:hover {
+    color: var(--link-hover);
+}
+
+.content-card .meta {
+    font-size: 0.9em;
+    color: var(--stage-direction-color);
+    margin-bottom: 0.5rem;
+}
+
+.content-card .preview {
+    font-size: 0.95em;
+    line-height: 1.4;
+    color: var(--text-color);
+}
+
+.search-section {
+    text-align: center;
+    margin-top: 2rem;
+    padding: 2rem;
+    background-color: var(--nav-bg);
+    border-radius: 8px;
+    border: 1px solid var(--nav-border);
+}
+
+.search-section h2 {
+    margin-top: 0;
+    margin-bottom: 1rem;
+}
+
+.search-form {
+    display: flex;
+    gap: 1rem;
+    max-width: 600px;
+    margin: 1rem auto;
+}
+
+.search-form input {
+    flex: 1;
+    padding: 0.8rem;
+    border: 1px solid var(--nav-border);
+    border-radius: 4px;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    font-family: 'IM Fell Regular', serif;
+    font-size: 1rem;
+}
+
+.search-form button {
+    padding: 0.8rem 1.5rem;
+    background-color: var(--button-bg);
+    color: var(--button-text);
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-family: 'IM Fell Regular', serif;
+    font-size: 1rem;
+}
+
+.search-form button:hover {
+    opacity: 0.9;
+}
+
+/* Welcome section styling */
+.welcome-section {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.welcome-section h1 {
+    font-family: 'IM Fell Regular', serif;
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+    color: var(--text-color);
+}
+
+.welcome-section p {
+    font-size: 1.1rem;
+    color: var(--stage-direction-color);
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .home-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .home-container {
+        padding: 1rem;
+    }
+
+    .search-form {
+        flex-direction: column;
+    }
+
+    .welcome-section h1 {
+        font-size: 2rem;
+    }
+}

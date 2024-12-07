@@ -3,15 +3,66 @@
 {% block title %}Shakespeare Authorship Project{% endblock %}
 
 {% block content %}
-<h1>Welcome to the Oxford Shakespeare Authorship Project</h1>
-<p>Explore the works of Shakespeare and perform research on the corpus.</p>
+<div class="home-header">
+    <h1>Welcome to the Oxford Shakespeare Authorship Project</h1>
+    <p class="subtitle">Explore the works of Shakespeare and perform research on the corpus.</p>
+</div>
 
-<form action="/search" method="get">
-    <input type="text" name="query" placeholder="Search the corpus">
-    <button type="submit">Search</button>
-</form>
+<div class="search-container">
+    <div class="search-box">
+        <form action="/search" method="get" class="search-form">
+            <input type="text" name="query" placeholder="Search the corpus">
+            <button type="submit">Search</button>
+        </form>
+    </div>
+</div>
 
-<h2>Latest Blog Post</h2>
-<p><em>This is a preview of the latest blog post...</em></p>
-<a href="/blog/latest">Read more</a>
+<div class="home-content">
+    <div class="left-column">
+        <div class="content-box">
+            <h2>Latest Blog Posts</h2>
+            {% if recent_posts %}
+                {% for post in recent_posts %}
+                    <div class="blog-preview">
+                        {% if post.header_image %}
+                        <div class="blog-preview-image">
+                            <a href="{{ url_for('blog_post', slug=post.slug) }}">
+                                <img src="{{ url_for('static', filename='header_images/' + post.header_image) }}"
+                                     alt="{{ post.title }}">
+                            </a>
+                        </div>
+                        {% endif %}
+                        <div class="blog-preview-content">
+                            <h3><a href="{{ url_for('blog_post', slug=post.slug) }}">{{ post.title }}</a></h3>
+                            <div class="post-meta">
+                                by {{ post.author.username }} on {{ post.created_at.strftime('%Y-%m-%d') }}
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <p>No blog posts yet.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="right-column">
+        <div class="content-box">
+            <h2>Recent Forum Activity</h2>
+            {% if recent_topics %}
+                {% for topic in recent_topics %}
+                    <div class="topic-preview">
+                        <h3><a href="{{ url_for('forum.topic', topic_id=topic.id) }}">{{ topic.title }}</a></h3>
+                        <div class="topic-meta">
+                            by {{ topic.user.username }} on {{ topic.created_at.strftime('%Y-%m-%d') }}
+                        </div>
+                        <p class="topic-excerpt">{{ topic.clean_content }}</p>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <p>No recent forum activity.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
 {% endblock %}

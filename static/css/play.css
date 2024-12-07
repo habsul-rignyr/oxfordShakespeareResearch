@@ -1,0 +1,88 @@
+/* Play Layout */
+.play-text {
+    max-width: 800px;
+}
+
+/* Character Mappings */
+.character-mappings {
+    background-color: var(--nav-bg);
+    border: 1px solid var(--nav-border);
+    border-radius: 8px;
+    padding: 1rem;
+    margin: 1rem 0;
+}
+
+.mappings-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 0.5rem;
+}
+
+.mapping {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.short-name {
+    font-weight: bold;
+    min-width: 3em;
+}
+
+.name-separator {
+    color: var(--stage-direction-color);
+}
+
+/* Acts and Scenes */
+.play-text h2 {
+    margin: 2rem 0 1rem 0;
+    font-size: 1.5em;
+}
+
+.play-text h3 {
+    margin: 1rem 0;
+    color: var(--stage-direction-color);
+}
+
+/* Stage Directions */
+.stage-direction {
+    font-family: 'IM Fell Italic', serif;
+    color: var(--stage-direction-color);
+    margin: 1rem 0;
+    font-style: italic;
+}
+
+/* Speech */
+.speech {
+    margin: 1rem 0;
+}
+
+.speaker {
+    font-weight: bold;
+    margin-bottom: 0.25rem;
+}
+
+.line {
+    padding: 0.1rem 0;
+    margin-left: 2rem;
+}
+
+/* Dropcaps */
+.dropcap {
+    font-family: 'Goudy Initialen', serif;
+    font-size: 3em;
+    float: left;
+    padding-right: 0.1em;
+    line-height: 0.8;
+}
+
+/* Responsive Design */
+@media (max-width: 600px) {
+    .line {
+        margin-left: 1rem;
+    }
+
+    .mappings-grid {
+        grid-template-columns: 1fr;
+    }
+}
