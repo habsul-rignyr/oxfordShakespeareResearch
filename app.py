@@ -13,6 +13,8 @@ from commands import create_admin_command
 from auth.oauth import oauth_handler
 from routes.forum import forum, init_forum_routes
 from flask_login import LoginManager, current_user
+from search import search
+
 
 app = Flask(__name__)
 
@@ -35,6 +37,7 @@ register_auth_routes(app)
 register_blog_routes(app)
 register_admin_routes(app)
 register_profile_routes(app)
+search.init_app(app)
 
 # Register forum routes - fixed the double registration
 forum_blueprint = init_forum_routes(app)
