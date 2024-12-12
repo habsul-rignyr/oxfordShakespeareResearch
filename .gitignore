@@ -21,3 +21,14 @@ instance/
 # Environment variables
 .env
 .env.*
+
+#fonts
+*.otf
+*.ttf
+
+#image folder
+header_images
+images
+
+
+
