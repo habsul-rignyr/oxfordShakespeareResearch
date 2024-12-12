@@ -14,102 +14,54 @@
                            name="q"
                            value="{{ query }}"
                            placeholder="Search the corpus...">
-                    <button type="submit" class="search-button">Search</button>
                 </div>
-
-                <div class="advanced-toggle-container">
-                    <button type="button" class="advanced-toggle">
-                        <span class="toggle-icon">▸</span> Advanced Search Options
-                    </button>
-
-                    <div class="advanced-search" id="advancedSearch">
-                        <div class="advanced-field">
-                            <label for="must_have">Must contain all:</label>
-                            <input type="text" id="must_have" name="must_have" value="{{ must_have }}">
-                        </div>
-                        <div class="advanced-field">
-                            <label for="should_have">Must contain any:</label>
-                            <input type="text" id="should_have" name="should_have" value="{{ should_have }}">
-                        </div>
-                        <div class="advanced-field">
-                            <label for="must_not">Must not contain:</label>
-                            <input type="text" id="must_not" name="must_not" value="{{ must_not }}">
-                        </div>
-                        <div class="advanced-field">
-                            <label for="phrase">Exact phrase:</label>
-                            <input type="text" id="phrase" name="phrase" value="{{ phrase }}">
-                        </div>
-                    </div>
+                <div class="search-button-container">
+                    <button type="submit" class="search-button">Search</button>
                 </div>
             </div>
 
             <div class="filter-section">
                 <h3>Sort Results</h3>
                 <div class="sort-container">
-                    <select name="sort">
-                        <option value="relevance" {% if sort == 'relevance' %}selected{% endif %}>Relevance</option>
-                        <option value="date_asc" {% if sort == 'date_asc' %}selected{% endif %}>Date (Oldest)</option>
-                        <option value="date_desc" {% if sort == 'date_desc' %}selected{% endif %}>Date (Newest)</option>
-                        <option value="title_asc" {% if sort == 'title_asc' %}selected{% endif %}>Title (A-Z)</option>
-                    </select>
+                    <div class="custom-dropdown">
+                        <button class="dropdown-toggle" id="sortDropdownToggle">
+                            Sort Results
+                        </button>
+                        <ul class="dropdown-options" id="sortDropdownOptions">
+                            <li data-value="relevance">Relevance</li>
+                            <li data-value="date_asc">Date (Oldest)</li>
+                            <li data-value="date_desc">Date (Newest)</li>
+                            <li data-value="title_asc">Title (A-Z)</li>
+                        </ul>
+                        <input type="hidden" name="sort" id="sortInput">
+                    </div>
                 </div>
             </div>
 
             <div class="filter-section">
-                <h3>Date Range</h3>
-                <div class="date-range">
-                    <input type="number"
-                           name="year_from"
-                           placeholder="From year"
-                           min="1450"
-                           max="1700"
-                           value="{{ request.args.get('year_from', '') }}">
-                    <input type="number"
-                           name="year_to"
-                           placeholder="To year"
-                           min="1450"
-                           max="1700"
-                           value="{{ request.args.get('year_to', '') }}">
+                <h3>Advanced Search Options</h3>
+                <button type="button" class="advanced-toggle">
+                    <span class="toggle-icon">▸</span> Toggle Advanced Search
+                </button>
+                <div class="advanced-search" id="advancedSearch">
+                    <div class="advanced-field">
+                        <label for="must_have">Must contain all:</label>
+                        <input type="text" id="must_have" name="must_have" value="{{ must_have }}">
+                    </div>
+                    <div class="advanced-field">
+                        <label for="should_have">Must contain any:</label>
+                        <input type="text" id="should_have" name="should_have" value="{{ should_have }}">
+                    </div>
+                    <div class="advanced-field">
+                        <label for="must_not">Must not contain:</label>
+                        <input type="text" id="must_not" name="must_not" value="{{ must_not }}">
+                    </div>
+                    <div class="advanced-field">
+                        <label for="phrase">Exact phrase:</label>
+                        <input type="text" id="phrase" name="phrase" value="{{ phrase }}">
+                    </div>
                 </div>
             </div>
-
-            {% if aggregations and (aggregations.collections or aggregations.genres) %}
-                {% if aggregations.collections %}
-                <div class="filter-section">
-                    <h3>Collection</h3>
-                    <div class="filter-options">
-                        {% for collection in aggregations.collections %}
-                            <label class="filter-option">
-                                <input type="checkbox"
-                                       name="collection"
-                                       value="{{ collection.key }}"
-                                       {% if collection.key in selected_collections %}checked{% endif %}>
-                                <span class="filter-label">{{ collection.key }}</span>
-                                <span class="filter-count">({{ collection.doc_count }})</span>
-                            </label>
-                        {% endfor %}
-                    </div>
-                </div>
-                {% endif %}
-
-                {% if aggregations.genres %}
-                <div class="filter-section">
-                    <h3>Genre</h3>
-                    <div class="filter-options">
-                        {% for genre in aggregations.genres %}
-                            <label class="filter-option">
-                                <input type="checkbox"
-                                       name="genre"
-                                       value="{{ genre.key }}"
-                                       {% if genre.key in selected_genres %}checked{% endif %}>
-                                <span class="filter-label">{{ genre.key }}</span>
-                                <span class="filter-count">({{ genre.doc_count }})</span>
-                            </label>
-                        {% endfor %}
-                    </div>
-                </div>
-                {% endif %}
-            {% endif %}
         </form>
     </aside>
 
@@ -120,17 +72,6 @@
                 <p>Enter your search terms to begin exploring the texts.</p>
             </div>
         {% else %}
-            {% if active_filters %}
-                <div class="active-filters">
-                    {% for filter in active_filters %}
-                        <span class="chip">
-                            {{ filter.label }}: {{ filter.value }}
-                            <a href="{{ filter.remove_url }}" class="remove-filter">×</a>
-                        </span>
-                    {% endfor %}
-                </div>
-            {% endif %}
-
             <div class="results-count">
                 Found {{ total_results }} results {% if query %}for "{{ query }}"{% endif %}
             </div>
@@ -144,56 +85,9 @@
                         <div class="result-metadata">
                             {% if result.author %}by {{ result.author }}{% endif %}
                             {% if result.publication_year %}({{ result.publication_year }}){% endif %}
-                            {% if result.collection %} • {{ result.collection }}{% endif %}
                         </div>
-                        {% if result.highlights %}
-                            <div class="result-highlights">
-                                {% for highlight in result.highlights %}
-                                    <div class="result-highlight">
-                                        {{ highlight|safe }}
-                                    </div>
-                                {% endfor %}
-                            </div>
-                        {% endif %}
                     </article>
                 {% endfor %}
-
-                {% if total_pages > 1 %}
-                    <div class="pagination">
-                        {% if current_page > 1 %}
-                            <a href="{{ update_url(page=current_page-1) }}" class="pagination-button">Previous</a>
-                        {% endif %}
-
-                        {% set window_size = 2 %}
-                        {% set window_start = [current_page - window_size, 1] | max %}
-                        {% set window_end = [current_page + window_size, total_pages] | min %}
-
-                        {% if window_start > 1 %}
-                            <a href="{{ update_url(page=1) }}" class="pagination-button">1</a>
-                            {% if window_start > 2 %}
-                                <span class="pagination-ellipsis">...</span>
-                            {% endif %}
-                        {% endif %}
-
-                        {% for p in range(window_start, window_end + 1) %}
-                            <a href="{{ update_url(page=p) }}"
-                               class="pagination-button {% if p == current_page %}active{% endif %}">
-                                {{ p }}
-                            </a>
-                        {% endfor %}
-
-                        {% if window_end < total_pages %}
-                            {% if window_end < total_pages - 1 %}
-                                <span class="pagination-ellipsis">...</span>
-                            {% endif %}
-                            <a href="{{ update_url(page=total_pages) }}" class="pagination-button">{{ total_pages }}</a>
-                        {% endif %}
-
-                        {% if current_page < total_pages %}
-                            <a href="{{ update_url(page=current_page+1) }}" class="pagination-button">Next</a>
-                        {% endif %}
-                    </div>
-                {% endif %}
             {% else %}
                 <p class="no-results">No results found.</p>
             {% endif %}
@@ -203,35 +97,5 @@
 {% endblock %}
 
 {% block scripts %}
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Advanced search toggle
-    const advancedToggle = document.querySelector('.advanced-toggle');
-    const advancedSearch = document.getElementById('advancedSearch');
-
-    if (advancedToggle && advancedSearch) {
-        // Initialize toggle state
-        const toggleIcon = advancedToggle.querySelector('.toggle-icon');
-        const isVisible = advancedSearch.classList.contains('visible');
-        toggleIcon.textContent = isVisible ? '▾' : '▸';
-
-        advancedToggle.addEventListener('click', function() {
-            const isNowVisible = advancedSearch.classList.contains('visible');
-            advancedSearch.classList.toggle('visible');
-            toggleIcon.textContent = isNowVisible ? '▸' : '▾';
-        });
-
-        // Check for advanced search parameters and show if any are present
-        const urlParams = new URLSearchParams(window.location.search);
-        const hasAdvancedParams = ['must_have', 'should_have', 'must_not', 'phrase'].some(param =>
-            urlParams.has(param) && urlParams.get(param).trim() !== ''
-        );
-
-        if (hasAdvancedParams) {
-            advancedSearch.classList.add('visible');
-            toggleIcon.textContent = '▾';
-        }
-    }
-});
-</script>
+<script src="{{ url_for('static', filename='js/search.js') }}"></script>
 {% endblock %}

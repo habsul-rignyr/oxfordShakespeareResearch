@@ -4,12 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}The Cynthian{% endblock %}</title>
+
+    <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
 
+    <!-- Base Stylesheet -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
-    <!-- Add CKEditor before other scripts -->
-    <script src="https://cdn.ckeditor.com/ckeditor5/36.0.1/classic/ckeditor.js"></script>
-    <script src="https://cdn.ckeditor.com/ckeditor5/36.0.1/classic/translations/en.js"></script>
+
 </head>
 <body>
     <nav class="navbar">
@@ -25,34 +26,22 @@
                 <span class="dark-icon">🌙</span>
             </button>
             {% if session.get('user_id') %}
-            <a href="{{ url_for('profile') }}" class="nav-link">Profile</a>
-            <a href="{{ url_for('logout') }}" class="nav-link">Logout</a>
+                <a href="{{ url_for('profile') }}" class="nav-link">Profile</a>
+                <a href="{{ url_for('logout') }}" class="nav-link">Logout</a>
             {% else %}
-            <a href="{{ url_for('login') }}" class="nav-link">Login</a>
+                <a href="{{ url_for('login') }}" class="nav-link">Login</a>
             {% endif %}
         </div>
     </nav>
+
     <div class="content">
         {% block content %}
         {% endblock %}
     </div>
-    <script src="https://unpkg.com/feather-icons"></script>
-    <script>
-      feather.replace();
-    </script>
-    <script>
-        // Check for saved theme preference or default to light
-        const theme = localStorage.getItem('theme') || 'light';
-        document.documentElement.setAttribute('data-theme', theme);
 
-        // Theme toggle functionality
-        const themeToggle = document.getElementById('theme-toggle');
-        themeToggle.addEventListener('click', () => {
-            const currentTheme = document.documentElement.getAttribute('data-theme');
-            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
-            document.documentElement.setAttribute('data-theme', newTheme);
-            localStorage.setItem('theme', newTheme);
-        });
-    </script>
+    <!-- External Scripts -->
+    <script src="{{ url_for('static', filename='js/base.js') }}"></script>
+    {% block scripts %}
+    {% endblock %}
 </body>
 </html>

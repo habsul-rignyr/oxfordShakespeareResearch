@@ -15,7 +15,6 @@ from routes.forum import forum, init_forum_routes
 from flask_login import LoginManager, current_user
 from search import search
 
-
 app = Flask(__name__)
 
 # Load configuration
@@ -53,6 +52,18 @@ def load_user(user_id):
 
 # Register commands
 app.cli.add_command(create_admin_command)
+
+# Add Content Security Policy (CSP) headers
+@app.after_request
+def set_csp_headers(response):
+    response.headers['Content-Security-Policy'] = (
+        "script-src 'self'; "
+        "style-src 'self' https://fonts.googleapis.com; "
+        "font-src 'self' https://fonts.gstatic.com;"
+    )
+    return response
+
+
 
 if __name__ == "__main__":
     app.run(debug=True)
