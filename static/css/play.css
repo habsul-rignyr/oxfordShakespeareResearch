@@ -52,9 +52,10 @@
     font-style: italic;
 }
 
-/* Speech */
+/* Speech and Lines */
 .speech {
     margin: 1rem 0;
+    position: relative;
 }
 
 .speaker {
@@ -63,17 +64,36 @@
 }
 
 .line {
+    display: block;
     padding: 0.1rem 0;
     margin-left: 2rem;
+    line-height: 1.6;
+    position: relative;
 }
 
-/* Dropcaps */
+/* Dropcap Styling */
 .dropcap {
     font-family: 'Goudy Initialen', serif;
-    font-size: 3em;
+    font-size: 3.5em;
     float: left;
     padding-right: 0.1em;
     line-height: 0.8;
+    position: relative;
+    margin-top: -0.25em;  /* Pull up the dropcap slightly */
+}
+
+/* Line containing dropcap */
+.line:has(.dropcap) {
+    display: flex;
+    align-items: flex-end;  /* Align text with bottom of dropcap */
+    min-height: 3em;        /* Ensure enough height for dropcap */
+    margin-bottom: 0.5em;   /* Space before next line */
+}
+
+/* Line after dropcap */
+.speech .line:has(.dropcap) + .line {
+    clear: both;
+    margin-top: 0.5em;     /* Space after dropcap line */
 }
 
 /* Responsive Design */

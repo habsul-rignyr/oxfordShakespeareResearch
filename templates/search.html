@@ -21,11 +21,45 @@
             </div>
 
             <div class="filter-section">
+                <h3>Publication Year</h3>
+                <div class="year-range">
+                    <div class="year-field">
+                        <label for="year_from">From:</label>
+                        <input type="number"
+                               id="year_from"
+                               name="year_from"
+                               value="{{ request.args.get('year_from', '') }}"
+                               min="1400"
+                               max="1700"
+                               placeholder="From year">
+                    </div>
+                    <div class="year-field">
+                        <label for="year_to">To:</label>
+                        <input type="number"
+                               id="year_to"
+                               name="year_to"
+                               value="{{ request.args.get('year_to', '') }}"
+                               min="1400"
+                               max="1700"
+                               placeholder="To year">
+                    </div>
+                </div>
+            </div>
+
+            <div class="filter-section">
                 <h3>Sort Results</h3>
                 <div class="sort-container">
                     <div class="custom-dropdown">
-                        <button class="dropdown-toggle" id="sortDropdownToggle">
-                            Sort Results
+                        <button type="button" class="dropdown-toggle" id="sortDropdownToggle">
+                            {% if sort == 'date_asc' %}
+                                Date (Oldest)
+                            {% elif sort == 'date_desc' %}
+                                Date (Newest)
+                            {% elif sort == 'title_asc' %}
+                                Title (A-Z)
+                            {% else %}
+                                Relevance
+                            {% endif %}
                         </button>
                         <ul class="dropdown-options" id="sortDropdownOptions">
                             <li data-value="relevance">Relevance</li>
@@ -33,7 +67,7 @@
                             <li data-value="date_desc">Date (Newest)</li>
                             <li data-value="title_asc">Title (A-Z)</li>
                         </ul>
-                        <input type="hidden" name="sort" id="sortInput">
+                        <input type="hidden" name="sort" id="sortInput" value="{{ sort }}">
                     </div>
                 </div>
             </div>
@@ -46,23 +80,49 @@
                 <div class="advanced-search" id="advancedSearch">
                     <div class="advanced-field">
                         <label for="must_have">Must contain all:</label>
-                        <input type="text" id="must_have" name="must_have" value="{{ must_have }}">
+                        <input type="text"
+                               id="must_have"
+                               name="must_have"
+                               value="{{ request.args.get('must_have', '') }}">
                     </div>
                     <div class="advanced-field">
                         <label for="should_have">Must contain any:</label>
-                        <input type="text" id="should_have" name="should_have" value="{{ should_have }}">
+                        <input type="text"
+                               id="should_have"
+                               name="should_have"
+                               value="{{ request.args.get('should_have', '') }}">
                     </div>
                     <div class="advanced-field">
                         <label for="must_not">Must not contain:</label>
-                        <input type="text" id="must_not" name="must_not" value="{{ must_not }}">
+                        <input type="text"
+                               id="must_not"
+                               name="must_not"
+                               value="{{ request.args.get('must_not', '') }}">
                     </div>
                     <div class="advanced-field">
                         <label for="phrase">Exact phrase:</label>
-                        <input type="text" id="phrase" name="phrase" value="{{ phrase }}">
+                        <input type="text"
+                               id="phrase"
+                               name="phrase"
+                               value="{{ request.args.get('phrase', '') }}">
                     </div>
                 </div>
             </div>
         </form>
+
+        {% if active_filters %}
+            <div class="active-filters">
+                <h3>Active Filters</h3>
+                <ul class="filter-tags">
+                    {% for filter in active_filters %}
+                        <li class="filter-tag">
+                            {{ filter.label }}: {{ filter.value }}
+                            <a href="{{ filter.remove_url }}" class="remove-filter">&times;</a>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        {% endif %}
     </aside>
 
     <main class="search-results">
@@ -85,9 +145,42 @@
                         <div class="result-metadata">
                             {% if result.author %}by {{ result.author }}{% endif %}
                             {% if result.publication_year %}({{ result.publication_year }}){% endif %}
+                            {% if result.collection %}
+                                <span class="result-collection">{{ result.collection }}</span>
+                            {% endif %}
                         </div>
                     </article>
                 {% endfor %}
+
+                {% if total_pages > 1 %}
+                    <div class="pagination">
+                        {% if current_page > 1 %}
+                            <a href="{{ update_url(page=current_page-1) }}" class="pagination-button">&laquo; Previous</a>
+                        {% endif %}
+
+                        {% set start = [1, current_page - 2] | max %}
+                        {% set end = [total_pages + 1, current_page + 3] | min %}
+
+                        {% if start > 1 %}
+                            <span class="pagination-ellipsis">...</span>
+                        {% endif %}
+
+                        {% for p in range(start, end) %}
+                            <a href="{{ update_url(page=p) }}"
+                               class="pagination-button {% if p == current_page %}active{% endif %}">
+                                {{ p }}
+                            </a>
+                        {% endfor %}
+
+                        {% if end < total_pages + 1 %}
+                            <span class="pagination-ellipsis">...</span>
+                        {% endif %}
+
+                        {% if current_page < total_pages %}
+                            <a href="{{ update_url(page=current_page+1) }}" class="pagination-button">Next &raquo;</a>
+                        {% endif %}
+                    </div>
+                {% endif %}
             {% else %}
                 <p class="no-results">No results found.</p>
             {% endif %}

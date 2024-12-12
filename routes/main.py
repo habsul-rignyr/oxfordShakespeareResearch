@@ -239,72 +239,43 @@ def register_routes(app):
         sort = request.args.get('sort', 'relevance')
         year_from = request.args.get('year_from', type=int)
         year_to = request.args.get('year_to', type=int)
-        collections = request.args.getlist('collection')
-        genres = request.args.getlist('genre')
 
-        current_app.logger.debug(f"Search parameters: query={query}, page={page}, sort={sort}")
+        current_app.logger.debug(f"Search route called with parameters: query={query}, "
+                                 f"year_from={year_from}, year_to={year_to}")
 
         try:
             # Build filters
             filters = {}
+            active_filters = []  # List to store active filters for display
+
             if year_from or year_to:
                 year_range = {}
                 if year_from:
                     year_range['gte'] = year_from
+                    active_filters.append({
+                        'label': 'From Year',
+                        'value': year_from,
+                        'remove_url': update_url(year_from=None)
+                    })
                 if year_to:
                     year_range['lte'] = year_to
+                    active_filters.append({
+                        'label': 'To Year',
+                        'value': year_to,
+                        'remove_url': update_url(year_to=None)
+                    })
                 filters['year'] = year_range
-            if collections:
-                filters['collections'] = collections
-            if genres:
-                filters['genres'] = genres
+
+            current_app.logger.debug(f"Built year range filter: {filters}")
 
             # Perform search
-            if not query and not filters:
-                search_results = {
-                    'results': [],
-                    'total': 0,
-                    'pages': 0,
-                    'aggregations': {}
-                }
-            else:
-                search_results = current_app.elasticsearch.search(
-                    query=query,
-                    filters=filters,
-                    sort=sort,
-                    page=page,
-                    per_page=20
-                )
-                current_app.logger.debug(f"Found {search_results['total']} results")
-
-            # Build active filters list
-            active_filters = []
-            if year_from:
-                active_filters.append({
-                    'label': 'From Year',
-                    'value': year_from,
-                    'remove_url': update_url(year_from=None)
-                })
-            if year_to:
-                active_filters.append({
-                    'label': 'To Year',
-                    'value': year_to,
-                    'remove_url': update_url(year_to=None)
-                })
-            for collection in collections:
-                new_collections = [c for c in collections if c != collection]
-                active_filters.append({
-                    'label': 'Collection',
-                    'value': collection,
-                    'remove_url': update_url(collection=new_collections or None)
-                })
-            for genre in genres:
-                new_genres = [g for g in genres if g != genre]
-                active_filters.append({
-                    'label': 'Genre',
-                    'value': genre,
-                    'remove_url': update_url(genre=new_genres or None)
-                })
+            search_results = current_app.elasticsearch.search(
+                query=query,
+                filters=filters,
+                sort=sort,
+                page=page,
+                per_page=20
+            )
 
             return render_template(
                 "search.html",
@@ -314,28 +285,22 @@ def register_routes(app):
                 total_pages=search_results['pages'],
                 current_page=page,
                 sort=sort,
-                aggregations=search_results.get('aggregations', {}),
-                selected_collections=collections,
-                selected_genres=genres,
-                active_filters=active_filters,
-                update_url=update_url
+                update_url=update_url,
+                active_filters=active_filters  # Pass the list of filter objects
             )
 
         except Exception as e:
-            current_app.logger.error(f"Search error: {str(e)}", exc_info=True)
+            current_app.logger.error(f"Search route error: {str(e)}", exc_info=True)
             return render_template(
                 "search.html",
                 query=query,
                 results=[],
                 total_results=0,
                 total_pages=0,
-                current_page=page,
+                current_page=1,
                 sort=sort,
-                aggregations={},
-                selected_collections=collections,
-                selected_genres=genres,
-                active_filters=[],
-                update_url=update_url
+                update_url=update_url,
+                active_filters=[]  # Empty list for error case
             )
 
     @app.route('/work/<int:work_id>')

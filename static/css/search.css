@@ -205,27 +205,66 @@
     color: #555;
 }
 
-/* Pagination */
+/* Add to your existing search.css */
+
+/* Year Range Styles */
+.year-range {
+    display: flex;
+    gap: 20px;  /* Increased gap between year fields */
+    margin-bottom: 15px;
+    padding: 0 5px;  /* Added padding to prevent touching container edges */
+}
+
+.year-field {
+    flex: 0 1 calc(50% - 10px);  /* Set explicit width with flex-shrink enabled */
+    min-width: 0;  /* Allow shrinking below content size */
+}
+
+.year-field label {
+    display: block;
+    margin-bottom: 5px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.9em;
+}
+
+.year-field input {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid var(--nav-border);
+    border-radius: 4px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.9em;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    box-sizing: border-box;  /* Ensure padding is included in width calculation */
+}
+
+/* Pagination Styles */
 .pagination {
     display: flex;
     justify-content: center;
-    gap: 5px;
+    gap: 8px;
     margin-top: 20px;
+    padding: 10px 0;
 }
 
 .pagination-button {
     padding: 8px 12px;
-    background-color: #007bff;
-    color: #fff;
-    text-decoration: none;
+    border: 1px solid var(--nav-border);
     border-radius: 4px;
-    transition: background-color 0.2s ease-in-out;
-}
-
-.pagination-button.active {
-    background-color: #0056b3;
+    background-color: var(--nav-bg);
+    color: var(--text-color);
+    text-decoration: none;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.9em;
+    transition: background-color 0.2s;
 }
 
 .pagination-button:hover {
-    background-color: #0056b3;
+    background-color: var(--button-bg);
+}
+
+.pagination-button.active {
+    background-color: var(--button-bg);
+    border-color: var(--text-color);
 }

@@ -200,66 +200,65 @@ class SearchClient:
 
         return bool_query if bool_query.to_dict()['bool'] else Q('match_all')
 
-    def search(self, query=None, filters=None, advanced_params=None, sort='relevance', page=1, per_page=20):
+    def search(self, query=None, filters=None, sort='relevance', page=1, per_page=20):
         """Perform a search with filters and pagination."""
         try:
-            search_query = {
+            current_app.logger.debug(f"Search called with query: {query}, filters: {filters}")
+
+            # Start building the search query
+            search_body = {
                 "query": {
+                    "bool": {
+                        "must": [],
+                        "filter": []
+                    }
+                },
+                "from": (page - 1) * per_page,
+                "size": per_page  # Fixed the typo here
+            }
+
+            # Add text query if provided
+            if query:
+                search_body["query"]["bool"]["must"].append({
                     "multi_match": {
                         "query": query,
                         "fields": ["title^3", "author^2", "content"],
                         "fuzziness": "AUTO"
                     }
-                } if query else {"match_all": {}}
-            }
+                })
 
             # Add filters if present
             if filters:
-                filter_clauses = []
+                current_app.logger.debug(f"Processing filters: {filters}")
+
+                # Handle year range filter
                 if 'year' in filters:
-                    filter_clauses.append({
+                    year_range = filters['year']
+                    current_app.logger.debug(f"Adding year range filter: {year_range}")
+                    year_filter = {
                         "range": {
-                            "publication_year": filters['year']
-                        }
-                    })
-                if 'collections' in filters:
-                    filter_clauses.append({
-                        "terms": {
-                            "collection": filters['collections']
-                        }
-                    })
-                if 'genres' in filters:
-                    filter_clauses.append({
-                        "terms": {
-                            "genre": filters['genres']
-                        }
-                    })
-                if filter_clauses:
-                    search_query["query"] = {
-                        "bool": {
-                            "must": [search_query["query"]],
-                            "filter": filter_clauses
+                            "publication_year": year_range
                         }
                     }
-
-            # Add pagination
-            from_idx = (page - 1) * per_page
-            search_query["from"] = from_idx
-            search_query["size"] = per_page
+                    search_body["query"]["bool"]["filter"].append(year_filter)
 
             # Add sorting
-            if sort == 'date_asc':
-                search_query["sort"] = [{"publication_year": "asc"}]
-            elif sort == 'date_desc':
-                search_query["sort"] = [{"publication_year": "desc"}]
-            elif sort == 'title_asc':
-                search_query["sort"] = [{"title.raw": "asc"}]
+            if sort and sort != 'relevance':
+                if sort == 'date_asc':
+                    search_body["sort"] = [{"publication_year": "asc"}]
+                elif sort == 'date_desc':
+                    search_body["sort"] = [{"publication_year": "desc"}]
+                elif sort == 'title_asc':
+                    search_body["sort"] = [{"title.raw": "asc"}]
 
-            # Execute search
+            current_app.logger.debug(f"Final search body: {search_body}")
+
+            # Execute the search
             response = self.es.search(
                 index=current_app.config['ELASTICSEARCH_INDEX'],
-                body=search_query
+                body=search_body
             )
+            current_app.logger.debug(f"Search response hits: {response['hits']['total']}")
 
             # Process results
             results = []
@@ -273,6 +272,7 @@ class SearchClient:
                     'score': hit['_score']
                 }
                 results.append(result)
+                current_app.logger.debug(f"Processed hit: {result}")
 
             total_hits = response['hits']['total']['value']
             total_pages = (total_hits + per_page - 1) // per_page
@@ -286,12 +286,7 @@ class SearchClient:
 
         except Exception as e:
             current_app.logger.error(f"Search error: {str(e)}", exc_info=True)
-            return {
-                'results': [],
-                'total': 0,
-                'pages': 0,
-                'aggregations': {}
-            }
+            raise
 
     def index_work(self, work, content):
         """Index a single work with its content."""

@@ -26,9 +26,9 @@ instance/
 *.otf
 *.ttf
 
-#image folder
+#image and font folders
 header_images
 images
-
+fonts
 
 
