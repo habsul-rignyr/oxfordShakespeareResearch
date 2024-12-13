@@ -1,51 +1,165 @@
-/* EEBO Work Styles */
+/* Main container */
 .work-container {
     max-width: 800px;
     margin: 0 auto;
-    padding: 2rem 0;
+    padding: 2rem;
+    font-family: 'IM Fell Regular', serif;
+    line-height: 1.6;
+    position: relative;
 }
 
+.work-container h3 {
+    width: 100%;
+    margin: 1rem 0;
+    text-align: justify;
+    box-sizing: border-box;
+    font-family: 'IM Fell Regular', serif;
+    line-height: 1.6;
+}
+
+/* Main content wrapper to maintain consistent width */
+.work-content {
+    width: 100%;
+    position: relative;
+    margin: 0 auto;
+}
+
+/* Metadata section */
 .work-metadata {
+    width: 100%;
     background-color: var(--nav-bg);
     border: 1px solid var(--nav-border);
     border-radius: 8px;
-    padding: 1rem;
-    margin: 1rem 0 2rem 0;
+    padding: 1.5rem;
+    margin: 1.5rem 0;
+    box-sizing: border-box;
 }
 
 .work-metadata p {
-    margin: 0.5rem 0;
+    margin: 0.75rem 0;
+    display: flex;
+    gap: 0.5rem;
 }
 
+.work-metadata strong {
+    min-width: 120px;
+    color: var(--stage-direction-color);
+}
+
+/* Content sections */
 .work-section {
+    width: 100%;
     margin: 2rem 0;
+    box-sizing: border-box;
 }
 
 .work-section h2 {
+    width: 100%;
     font-size: 1.5em;
     margin-bottom: 1rem;
     padding-bottom: 0.5rem;
     border-bottom: 1px solid var(--nav-border);
+    box-sizing: border-box;
 }
 
 .work-section h3 {
+    width: 100%;
     font-size: 1.2em;
-    margin: 1.5rem 0 1rem 0;
-}
-
-.work-content p {
     margin: 1rem 0;
-    line-height: 1.6;
+    color: var(--stage-direction-color);
+    font-family: 'IM Fell Italic', serif;
+    box-sizing: border-box;
 }
 
+/* Main text content */
+div[type="text"] {
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* Basic text elements */
+p {
+    width: 100%;
+    margin: 1rem 0;
+    text-align: justify;
+    box-sizing: border-box;
+}
+
+/* Title elements */
+.title_page {
+    width: 100%;
+    text-align: center;
+    margin: 2rem 0;
+    line-height: 1.8;
+    box-sizing: border-box;
+}
+
+/* Notes and special content */
 .note {
+    width: 100%;
     font-style: italic;
     color: var(--stage-direction-color);
-    margin: 1rem 0;
-    padding-left: 1rem;
-    border-left: 2px solid var(--nav-border);
+    margin: 1.5rem 0;
+    padding: 1rem 1.5rem;
+    border-left: 3px solid var(--nav-border);
+    background-color: var(--nav-bg);
+    border-radius: 0 4px 4px 0;
+    box-sizing: border-box;
 }
 
-.highlight {
-    font-weight: bold;
+/* Margin notes */
+note[place="margin"] {
+    font-size: 0.9em;
+    color: var(--stage-direction-color);
+    background-color: var(--nav-bg);
+    padding: 0.5rem;
+    border-radius: 4px;
+    margin: 0.5rem 0;
+    box-sizing: border-box;
+    width: 100%;
+}
+
+/* Front matter */
+div[type="dedication"],
+div[type="preface"] {
+    width: 100%;
+    margin: 2rem 0;
+    box-sizing: border-box;
+}
+
+/* Decorative elements */
+[rend="decorInit"] {
+    display: inline-block;
+    float: left;
+    font-size: 3em;
+    line-height: 0.8;
+    margin: 0.1em 0.1em 0 0;
+    padding: 0;
+    font-family: 'Goudy Initialen', serif;
+}
+
+/* Historical typography */
+.hi {
+    font-style: italic;
+}
+
+[rend="sup"] {
+    vertical-align: super;
+    font-size: 0.8em;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .work-container {
+        padding: 1rem;
+    }
+
+    .work-metadata p {
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+
+    .work-metadata strong {
+        min-width: auto;
+    }
 }

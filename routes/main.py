@@ -187,26 +187,59 @@ def process_eebo_section(section):
     """Process a section of EEBO-TCP XML into formatted text"""
     content = []
 
+    def process_text_with_marks(element):
+        """Process text while handling special characters and hyphenation"""
+        text_parts = []
+        last_was_hyphen = False
+
+        for item in element.iter():
+            # Handle g elements (special characters)
+            if item.tag.endswith('}g'):
+                ref = item.get('ref', '')
+                if 'EOLhyphen' in ref:
+                    last_was_hyphen = True
+                    continue
+                # Handle other special characters
+                if 'cmbAbbrStroke' in ref:
+                    text_parts.append('̄')  # Unicode combining macron
+                continue
+
+            # Get text content
+            text = item.text or ''
+            tail = item.tail or ''
+
+            # Handle text based on previous hyphen
+            if last_was_hyphen:
+                text = text.lstrip()  # Remove leading space after hyphen
+                last_was_hyphen = False
+
+            if text:
+                text_parts.append(text)
+            if tail:
+                text_parts.append(tail)
+
+        return ''.join(text_parts)
+
     for elem in section.iter():
         tag = elem.tag.split('}')[-1]  # Remove namespace
 
         if tag == 'p':  # Paragraph
-            text = ' '.join(elem.itertext()).strip()
-            if text:
+            text = process_text_with_marks(elem)
+            if text.strip():
                 content.append(('paragraph', text))
         elif tag == 'head':  # Heading
-            text = ' '.join(elem.itertext()).strip()
-            if text:
+            text = process_text_with_marks(elem)
+            if text.strip():
                 content.append(('heading', text))
         elif tag == 'lb':  # Line break
             content.append(('linebreak', None))
         elif tag == 'note':  # Notes
-            text = ' '.join(elem.itertext()).strip()
-            if text:
+            text = process_text_with_marks(elem)
+            if text.strip():
                 content.append(('note', text))
         elif tag == 'hi':  # Highlighted text
-            text = ' '.join(elem.itertext()).strip()
-            if text:
+            text = process_text_with_marks(elem)
+            if text.strip():
                 content.append(('highlight', text))
 
     return content
