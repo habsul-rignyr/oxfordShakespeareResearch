@@ -11,9 +11,7 @@ from normalization import normalize_text
 from urllib.parse import urlencode
 from elasticsearch_dsl import Q
 
-
 def strip_html_tags(text):
-    """Remove HTML tags and decode HTML entities from text"""
     if not text:
         return ""
     clean_text = re.compile('<.*?>').sub(' ', text)
@@ -21,9 +19,7 @@ def strip_html_tags(text):
     clean_text = ' '.join(clean_text.split())
     return clean_text
 
-
 def update_url(**new_params):
-    """Update URL parameters while maintaining existing ones"""
     params = request.args.copy()
     for key, value in new_params.items():
         if value is None and key in params:
@@ -31,7 +27,6 @@ def update_url(**new_params):
         else:
             params[key] = value
     return f"{request.path}?{urlencode(params, doseq=True)}"
-
 
 def get_character_mappings(root):
     """Extract character mappings from XML"""
@@ -47,7 +42,6 @@ def get_character_mappings(root):
                     'full': full_name
                 })
     return sorted(mappings, key=lambda x: x['short'])
-
 
 def process_acts(root):
     """Process acts from XML"""
@@ -76,7 +70,6 @@ def process_acts(root):
 
     return acts
 
-
 def process_prologue(prologue_act):
     """Process prologue content"""
     prologue_scenes = []
@@ -87,7 +80,6 @@ def process_prologue(prologue_act):
             'content': content
         })
     return prologue_scenes
-
 
 def process_scenes(act):
     """Process scenes from an act"""
@@ -108,7 +100,6 @@ def process_scenes(act):
         })
     return scenes
 
-
 def process_content(element):
     """Process content of a scene or prologue"""
     content = []
@@ -123,7 +114,6 @@ def process_content(element):
                     'text': stage_text
                 })
     return content
-
 
 def process_speech(speech_element):
     """Process speech content"""
@@ -149,6 +139,57 @@ def process_speech(speech_element):
         'lines': lines
     }
 
+def process_eebo_section(section):
+    """Process a section of EEBO-TCP XML into formatted text"""
+    content = []
+
+    def process_text_with_marks(element):
+        """Process text while handling special characters and hyphenation"""
+        text_parts = []
+        for item in element.itertext():
+            text_parts.append(item)
+
+        # Join all text first
+        text = ''.join(text_parts)
+
+        # Now handle special characters
+        for g_elem in element.findall(".//g"):
+            ref = g_elem.get('ref', '')
+            if 'EOLhyphen' in ref:
+                # Get the text before and after this g element
+                prev_text = g_elem.tail or ''
+                next_text = g_elem.getnext().text if g_elem.getnext() is not None else ''
+                # Join with hyphen and remove extra spaces
+                text = text.replace(prev_text + ' ' + next_text, prev_text.rstrip() + '-' + next_text.lstrip())
+            elif 'cmbAbbrStroke' in ref:
+                # Handle abbreviation strokes
+                text = text.replace(g_elem.tail or '', '̄' + (g_elem.tail or ''))
+
+        return text
+
+    for elem in section.iter():
+        tag = elem.tag.split('}')[-1]  # Remove namespace
+
+        if tag == 'p':  # Paragraph
+            text = process_text_with_marks(elem)
+            if text.strip():
+                content.append(('paragraph', text))
+        elif tag == 'head':  # Heading
+            text = process_text_with_marks(elem)
+            if text.strip():
+                content.append(('heading', text))
+        elif tag == 'lb':  # Line break
+            content.append(('linebreak', None))
+        elif tag == 'note':  # Notes
+            text = process_text_with_marks(elem)
+            if text.strip():
+                content.append(('note', text))
+        elif tag == 'hi':  # Highlighted text
+            text = process_text_with_marks(elem)
+            if text.strip():
+                content.append(('highlight', text))
+
+    return content
 
 def process_eebo_content(root):
     """Process EEBO-TCP XML content into displayable sections"""
@@ -182,69 +223,6 @@ def process_eebo_content(root):
 
     return content
 
-
-def process_eebo_section(section):
-    """Process a section of EEBO-TCP XML into formatted text"""
-    content = []
-
-    def process_text_with_marks(element):
-        """Process text while handling special characters and hyphenation"""
-        text_parts = []
-        last_was_hyphen = False
-
-        for item in element.iter():
-            # Handle g elements (special characters)
-            if item.tag.endswith('}g'):
-                ref = item.get('ref', '')
-                if 'EOLhyphen' in ref:
-                    last_was_hyphen = True
-                    continue
-                # Handle other special characters
-                if 'cmbAbbrStroke' in ref:
-                    text_parts.append('̄')  # Unicode combining macron
-                continue
-
-            # Get text content
-            text = item.text or ''
-            tail = item.tail or ''
-
-            # Handle text based on previous hyphen
-            if last_was_hyphen:
-                text = text.lstrip()  # Remove leading space after hyphen
-                last_was_hyphen = False
-
-            if text:
-                text_parts.append(text)
-            if tail:
-                text_parts.append(tail)
-
-        return ''.join(text_parts)
-
-    for elem in section.iter():
-        tag = elem.tag.split('}')[-1]  # Remove namespace
-
-        if tag == 'p':  # Paragraph
-            text = process_text_with_marks(elem)
-            if text.strip():
-                content.append(('paragraph', text))
-        elif tag == 'head':  # Heading
-            text = process_text_with_marks(elem)
-            if text.strip():
-                content.append(('heading', text))
-        elif tag == 'lb':  # Line break
-            content.append(('linebreak', None))
-        elif tag == 'note':  # Notes
-            text = process_text_with_marks(elem)
-            if text.strip():
-                content.append(('note', text))
-        elif tag == 'hi':  # Highlighted text
-            text = process_text_with_marks(elem)
-            if text.strip():
-                content.append(('highlight', text))
-
-    return content
-
-
 def register_routes(app):
     @app.route('/')
     def home():
@@ -266,7 +244,6 @@ def register_routes(app):
 
     @app.route('/search')
     def search():
-        # Get search parameters
         query = request.args.get('q', '').strip()
         page = int(request.args.get('page', 1))
         sort = request.args.get('sort', 'relevance')
@@ -277,9 +254,8 @@ def register_routes(app):
                                  f"year_from={year_from}, year_to={year_to}")
 
         try:
-            # Build filters
             filters = {}
-            active_filters = []  # List to store active filters for display
+            active_filters = []
 
             if year_from or year_to:
                 year_range = {}
@@ -301,7 +277,6 @@ def register_routes(app):
 
             current_app.logger.debug(f"Built year range filter: {filters}")
 
-            # Perform search
             search_results = current_app.elasticsearch.search(
                 query=query,
                 filters=filters,
@@ -319,7 +294,7 @@ def register_routes(app):
                 current_page=page,
                 sort=sort,
                 update_url=update_url,
-                active_filters=active_filters  # Pass the list of filter objects
+                active_filters=active_filters
             )
 
         except Exception as e:
@@ -333,7 +308,7 @@ def register_routes(app):
                 current_page=1,
                 sort=sort,
                 update_url=update_url,
-                active_filters=[]  # Empty list for error case
+                active_filters=[]
             )
 
     @app.route('/work/<int:work_id>')
@@ -373,40 +348,5 @@ def register_routes(app):
 
         except ET.ParseError:
             abort(500, description="Error parsing XML file")
-
-    @app.route('/test_search')
-    def test_search():
-        """Temporary route to test Elasticsearch directly"""
-        try:
-            # Test basic search
-            test_query = {
-                "query": {
-                    "multi_match": {
-                        "query": "shakespeare",
-                        "fields": ["title^3", "author^2", "content"]
-                    }
-                }
-            }
-
-            result = current_app.elasticsearch.es.search(
-                index=current_app.config['ELASTICSEARCH_INDEX'],
-                body=test_query
-            )
-
-            return {
-                "total_hits": result['hits']['total']['value'],
-                "first_few_hits": [
-                    {
-                        "title": hit['_source'].get('title'),
-                        "author": hit['_source'].get('author'),
-                        "score": hit['_score']
-                    }
-                    for hit in result['hits']['hits'][:5]
-                ],
-                "query_used": test_query
-            }
-
-        except Exception as e:
-            return {"error": str(e)}
 
     return app
