@@ -11,6 +11,10 @@
 @import 'work.css?v=1';
 @import 'search.css?v=1';
 
+.subtitle {
+    text-align: center;
+}
+
 /* Base styles */
 body {
     font-family: 'IM Fell Regular', serif;

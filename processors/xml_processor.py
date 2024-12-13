@@ -1,5 +1,3 @@
-# processors/xml_processor.py
-
 from xml.etree import ElementTree as ET
 
 
@@ -203,16 +201,12 @@ class XMLProcessor:
         content = []
         processed_headings = set()  # Keep track of headings we've seen
 
-        print("\nProcessing XML section...")  # Debug
-
         for elem in section.iter():
             tag = elem.tag.split('}')[-1]  # Remove namespace
-            print(f"Found element: {tag}")  # Debug
 
             if tag == 'p':  # Paragraph content
                 text = self.process_text_with_marks(elem)
                 if text and text.strip():
-                    print(f"Adding paragraph: {text[:50]}...")  # Debug
                     content.append(('p', text.strip()))
 
             elif tag == 'head':  # Heading
@@ -221,11 +215,6 @@ class XMLProcessor:
                     # Only add heading if we haven't seen it before
                     if text not in processed_headings:
                         processed_headings.add(text)
-                        print(f"Adding heading: {text[:50]}...")  # Debug
                         content.append(('head', text.strip()))
-
-        print(f"Total content items: {len(content)}")  # Debug
-        for i, (type, text) in enumerate(content):
-            print(f"{i + 1}. Type: {type}, Text: {text[:50]}...")  # Debug
 
         return content

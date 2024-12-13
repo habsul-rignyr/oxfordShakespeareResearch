@@ -3,16 +3,16 @@
 {% block content %}
 <div class="work-container">
     <h1>{{ work.title }}</h1>
-    
+
     <div class="work-metadata">
         {% if work.author %}
-        <p><strong>Author:</strong> {{ work.author }}</p>
+            <p><strong>Author:</strong> {{ work.author }}</p>
         {% endif %}
         {% if work.publication_year %}
-        <p><strong>Published:</strong> {{ work.publication_year }}</p>
+            <p><strong>Published:</strong> {{ work.publication_year }}</p>
         {% endif %}
         {% if work.tcp_id %}
-        <p><strong>TCP ID:</strong> {{ work.tcp_id }}</p>
+            <p><strong>TCP ID:</strong> {{ work.tcp_id }}</p>
         {% endif %}
     </div>
 
@@ -21,16 +21,12 @@
             <div class="work-section">
                 <h2>{{ section_title }}</h2>
                 {% for type, text in section_content %}
-                    {% if type == 'paragraph' %}
+                    {% if type == 'p' %}
                         <p>{{ text }}</p>
-                    {% elif type == 'heading' %}
+                    {% elif type == 'head' %}
                         <h3>{{ text }}</h3>
-                    {% elif type == 'linebreak' %}
-                        <br>
-                    {% elif type == 'note' %}
-                        <div class="note">{{ text }}</div>
-                    {% elif type == 'highlight' %}
-                        <span class="highlight">{{ text }}</span>
+                    {% else %}
+                        <p><em>Unknown content type</em></p>
                     {% endif %}
                 {% endfor %}
             </div>

@@ -125,16 +125,20 @@ def register_routes(app):
 
             if work.collection == 'EEBO-TCP':
                 content = xml_processor.process_eebo_content(root)
+                # Debugging: Print the content structure to the console
+
                 return render_template("eebo_work.html",
-                                    work=work,
-                                    content=content)
+                                       work=work,
+                                       content=content)
             else:
                 play_content = xml_processor.process_play_content(root)
+                # Debugging: Print the play content structure to the console
+
                 return render_template("play.html",
-                                    work=work,
-                                    play_title=play_content['title'],
-                                    acts=play_content['acts'],
-                                    character_mappings=play_content['character_mappings'])
+                                       work=work,
+                                       play_title=play_content['title'],
+                                       acts=play_content['acts'],
+                                       character_mappings=play_content['character_mappings'])
 
         except ET.ParseError:
             abort(500, description="Error parsing XML file")
