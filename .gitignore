@@ -8,9 +8,11 @@ __pycache__/
 
 # Database files
 *.db
+*.sqlite3
 
-# IDE settings (optional, e.g., PyCharm)
+# IDE settings (optional, e.g., PyCharm or VSCode)
 .idea/
+.vscode/
 
 # Config files
 config.py
@@ -22,13 +24,33 @@ instance/
 .env
 .env.*
 
-#fonts
+# Fonts
 *.otf
 *.ttf
 
-#image and font folders
+# Image and font folders
 header_images
 images
 fonts
 
+# Logs and migrations
+*.log
+migrations/
 
+# Uploads and media
+uploads/
+static/uploads/
+static/header_images/
+
+# Temporary or development files
+*.tmp
+*.bak
+*.swp
+*.swo
+
+# macOS and system files
+.DS_Store
+Thumbs.db
+
+# Elasticsearch and search-related
+*.log

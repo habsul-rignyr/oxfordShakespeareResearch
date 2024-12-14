@@ -2,16 +2,7 @@ from xml.etree import ElementTree as ET
 
 
 class XMLProcessor:
-    """Processor for historical texts in XML format, particularly EEBO-TCP and play texts.
-
-    Specializes in handling:
-    - EEBO-TCP text formatting
-    - Early modern English text
-    - Special character processing
-    - Historical hyphenation
-    - Poetry structures
-    - Drama structures
-    """
+    """Processor for historical texts in XML format, particularly EEBO-TCP and play texts."""
 
     def __init__(self):
         self.namespaces = {
@@ -23,267 +14,134 @@ class XMLProcessor:
         if element is None:
             return ""
 
-        # First collect all text parts
+        # Collect text and inline elements
         text_parts = []
-        for item in element.itertext():
-            text_parts.append(item)
+        for item in element.iter():
+            if item.tag == 'g':  # Handle `<g>` elements
+                ref = item.get('ref', '')
+                if 'EOLhyphen' in ref:  # Join hyphenated words
+                    prev_text = item.tail or ''
+                    next_elem = item.getnext()
+                    if next_elem is not None:
+                        next_text = next_elem.text or ''
+                        text_parts.append(prev_text.rstrip() + '-' + next_text.lstrip())
+                else:
+                    continue  # Ignore non-hyphenation `<g>` elements
+            elif item.tag == 'gap':  # Handle `<gap>` (illegible text)
+                desc = item.find('desc')
+                text_parts.append(f"[{desc.text if desc is not None else 'gap'}]")
+            else:
+                text_parts.append(item.text or '')
 
-        # Join all text first
-        text = ''.join(text_parts)
-
-        # Find all g elements and process them in order
-        for g_elem in element.findall(".//g"):
-            ref = g_elem.get('ref', '')
-
-            # Handle hyphenation
-            if 'EOLhyphen' in ref:
-                # Get surrounding text
-                prev_text = g_elem.tail or ''
-                next_elem = g_elem.getnext()
-                if next_elem is not None:
-                    next_text = next_elem.text or ''
-                    # Replace the space between hyphenated parts with a hyphen
-                    text = text.replace(prev_text + ' ' + next_text,
-                                        prev_text.rstrip() + '-' + next_text.lstrip())
-
-        text = ' '.join(text.split())  # Normalize whitespace
-        return text
+        # Normalize whitespace
+        return ' '.join(''.join(text_parts).split())
 
     def process_eebo_content(self, root):
-        """Process EEBO-TCP XML content"""
+        """Process EEBO-TCP XML content."""
         content = []
+        processed_ids = set()
 
         # Find body with namespace
         body = root.find('.//tei:body', self.namespaces)
         if body is None:
-            body = root.find('.//body')  # Try without namespace
+            body = root.find('.//body')
             if body is None:
                 return content
 
-        # Process each div based on type
-        for div in body.findall('.//tei:div', self.namespaces):
-            div_type = div.get('type', '')
+        # Process all divs that are chapters or text
+        for div in body.findall('.//tei:div[@type="chapter"]', self.namespaces):
+            if id(div) not in processed_ids:
+                processed_ids.add(id(div))
 
-            if div_type == 'poem':
-                poem_content = self.process_poem_div(div)
-                if poem_content:
-                    head = div.find('.//tei:head', self.namespaces) or div.find('head')
-                    title = self.process_text_with_marks(head) if head is not None else 'Poem'
-                    content.append((title, poem_content))
-
-            elif div_type in ['text', 'chapter']:
-                prose_content = self.process_prose_div(div)
-                if prose_content:
-                    head = div.find('.//tei:head', self.namespaces) or div.find('head')
-                    title = self.process_text_with_marks(head) if head is not None else 'Section'
-                    content.append((title, prose_content))
+                # Get chapter heading
+                head = div.find('tei:head', self.namespaces) or div.find('head')
+                if head is not None:
+                    chapter_title = self.process_text_with_marks(head)
+                    chapter_content = self.process_prose_div(div)
+                    if chapter_content:
+                        content.append((chapter_title, chapter_content))
 
         return content
 
     def process_poem_div(self, div):
-        """Process a poem div and its parts"""
+        """Process a poem div, handling lines and maintaining hierarchy."""
         content = []
-        processed_headings = set()
+        processed_ids = set()  # Track processed lines to prevent duplicates
 
-        def add_heading(elem):
-            """Add heading if it hasn't been processed yet"""
-            if elem is not None:
-                text = self.process_text_with_marks(elem)
-                if text and text.strip() and text not in processed_headings:
-                    processed_headings.add(text)
-                    return ('head', text.strip())
-            return None
+        def process_lines(lines):
+            """Helper to process lines, tracking which have been processed"""
+            line_content = []
+            for line in lines:
+                if id(line) not in processed_ids:
+                    if line.text and line.text.strip():
+                        line_content.append(("line", self.process_text_with_marks(line)))
+                    processed_ids.add(id(line))
+            return line_content
 
-        # Process main poem heading
-        main_head = div.find('tei:head', self.namespaces) or div.find('head')
-        if main_head is not None:
-            heading = add_heading(main_head)
-            if heading:
-                content.append(heading)
+        # First process lines within line groups
+        for lg in div.findall('.//tei:lg', self.namespaces):
+            content.extend(process_lines(lg.findall('tei:l', self.namespaces)))
 
-        # Process figures with their lines
-        for fig in div.findall('.//figure'):
-            for line in fig.findall('l'):
-                text = self.process_text_with_marks(line)
-                if text and text.strip():
-                    content.append(('line', text.strip()))
-
-            # Process figure heading if present
-            fig_head = fig.find('head')
-            if fig_head is not None:
-                heading = add_heading(fig_head)
-                if heading:
-                    content.append(heading)
-
-        # Process parts
-        for part in div.findall('div[@type="part"]'):
-            # Process part heading
-            part_head = part.find('head')
-            if part_head is not None:
-                heading = add_heading(part_head)
-                if heading:
-                    content.append(heading)
-
-            # Process lines in part
-            for line in part.findall('l'):
-                text = self.process_text_with_marks(line)
-                if text and text.strip():
-                    content.append(('line', text.strip()))
-
-            # Process line groups in part
-            for lg in part.findall('lg'):
-                for line in lg.findall('l'):
-                    text = self.process_text_with_marks(line)
-                    if text and text.strip():
-                        content.append(('line', text.strip()))
+        # Then process standalone lines (not in line groups)
+        for line in div.findall('tei:l', self.namespaces):
+            if id(line) not in processed_ids and line.text and line.text.strip():
+                content.append(("line", self.process_text_with_marks(line)))
+                processed_ids.add(id(line))
 
         return content
 
     def process_prose_div(self, div):
-        """Process a prose div and its parts"""
+        """Process a prose div, handling only <p> tags."""
         content = []
+        processed_ids = set()
 
-        # Process paragraphs
+        def process_inline(element):
+            """Process inline elements with proper nesting and unique handling."""
+            if element is None:
+                return ""
+
+            text_parts = []
+
+            # Process the element's own text
+            if element.text:
+                text_parts.append(element.text)
+
+            # Process child elements
+            for child in element:
+                # Skip if already processed
+                if id(child) in processed_ids:
+                    continue
+
+                if child.tag.endswith('hi'):
+                    text_parts.append(process_inline(child))
+                elif child.tag.endswith('gap'):
+                    desc = child.find('desc')
+                    if desc is not None and desc.text:
+                        text_parts.append(f"[{desc.text}]")
+                    else:
+                        text_parts.append("[gap]")
+                elif child.tag.endswith('g'):
+                    ref = child.get('ref', '')
+                    if 'EOLhyphen' in ref:
+                        text_parts.append('-')
+
+                processed_ids.add(id(child))
+
+                # Add any tail text
+                if child.tail:
+                    text_parts.append(child.tail)
+
+            return ' '.join(''.join(text_parts).split())
+
+        # Process all paragraphs within the div
         for p in div.findall('.//tei:p', self.namespaces):
-            text = self.process_text_with_marks(p)
-            if text and text.strip():
-                content.append(('p', text.strip()))
-
-        # Process headers
-        for head in div.findall('.//tei:head', self.namespaces):
-            text = self.process_text_with_marks(head)
-            if text and text.strip():
-                content.append(('head', text.strip()))
+            if id(p) not in processed_ids:
+                text = process_inline(p)
+                if text and text.strip():
+                    content.append(('p', text.strip()))
+                    processed_ids.add(id(p))
 
         return content
 
-    def process_play_content(self, root):
-        """Process dramatic content from play XML"""
-        title_element = root.find('.//title')
-        if title_element is not None:
-            title_parts = []
-            for part in title_element.itertext():
-                title_parts.append(part.strip())
-            play_title = ' '.join(title_parts)
-        else:
-            play_title = "Untitled Play"
 
-        acts = self.process_acts(root)
-        character_mappings = self.get_character_mappings(root)
 
-        return {
-            'title': play_title,
-            'acts': acts,
-            'character_mappings': character_mappings
-        }
-
-    def get_character_mappings(self, root):
-        """Extract character mappings from play XML"""
-        character_list = []
-        for character in root.findall('.//persona'):
-            character_name = character.find('persname')
-            if character_name is not None:
-                abbreviated_name = character_name.get('short', '')
-                full_name = character_name.text or ''
-                if abbreviated_name and full_name:
-                    character_list.append({
-                        'short': abbreviated_name,
-                        'full': full_name
-                    })
-        return sorted(character_list, key=lambda x: x['short'])
-
-    def process_acts(self, root):
-        """Process acts from play XML"""
-        acts = []
-
-        # Handle prologue
-        prologue = root.find(".//act[@num='0']")
-        if prologue is not None:
-            prologue_scenes = self.process_prologue(prologue)
-            acts.append({
-                'act_title': 'Prologue',
-                'scenes': prologue_scenes
-            })
-
-        # Handle regular acts
-        for act in root.findall('act'):
-            if act.get('num') == '0':
-                continue
-
-            act_title = act.find('acttitle').text if act.find('acttitle') is not None else None
-            scenes = self.process_scenes(act)
-            acts.append({
-                'act_title': act_title,
-                'scenes': scenes
-            })
-
-        return acts
-
-    def process_prologue(self, prologue_act):
-        """Process prologue content"""
-        prologue_scenes = []
-        for prologue_section in prologue_act.findall('.//prologue'):
-            content = self.process_content(prologue_section)
-            prologue_scenes.append({
-                'scene_title': None,
-                'content': content
-            })
-        return prologue_scenes
-
-    def process_scenes(self, act):
-        """Process scenes from an act"""
-        scenes = []
-        for scene in act.findall('scene'):
-            scene_title = scene.find('scenetitle')
-            if scene_title is not None:
-                scene_text = ''.join(scene_title.itertext())
-                if scene_text != act.find('acttitle').text:
-                    scene_title = scene_text
-                else:
-                    scene_title = None
-
-            content = self.process_content(scene)
-            scenes.append({
-                'scene_title': scene_title,
-                'content': content
-            })
-        return scenes
-
-    def process_content(self, element):
-        """Process dramatic content from a scene or prologue"""
-        content = []
-        for element_type in element:
-            if element_type.tag == 'speech':
-                content.append(self.process_speech(element_type))
-            elif element_type.tag == 'stagedir':
-                stage_direction = ''.join(element_type.itertext())
-                if stage_direction:
-                    content.append({
-                        'type': 'stagedir',
-                        'text': stage_direction
-                    })
-        return content
-
-    def process_speech(self, speech_element):
-        """Process speech elements from dramatic text"""
-        speaker_element = speech_element.find('speaker')
-        speaker = speaker_element.get(
-            'short') or speaker_element.text or 'Unknown Speaker' if speaker_element is not None else 'Unknown Speaker'
-
-        dialogue_lines = []
-        for line in speech_element.findall('line'):
-            if line.find('dropcap') is not None:
-                initial_letter = line.find('dropcap').text
-                remaining_text = ''.join(part for part in line.itertext() if part != initial_letter)
-                line_text = f'<span class="dropcap">{initial_letter}</span>{remaining_text}'
-            else:
-                line_text = ''.join(line.itertext())
-
-            if line_text:
-                dialogue_lines.append(line_text)
-
-        return {
-            'type': 'speech',
-            'speaker': speaker,
-            'lines': dialogue_lines
-        }
