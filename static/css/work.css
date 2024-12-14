@@ -54,12 +54,9 @@
 }
 
 .work-section h2 {
-    width: 100%;
-    font-size: 1.5em;
-    margin-bottom: 1rem;
+    margin-bottom: 2rem;
     padding-bottom: 0.5rem;
     border-bottom: 1px solid var(--nav-border);
-    box-sizing: border-box;
 }
 
 .work-section h3 {
@@ -146,6 +143,30 @@ div[type="preface"] {
 [rend="sup"] {
     vertical-align: super;
     font-size: 0.8em;
+}
+
+.poem-line {
+    margin-left: 2rem;
+    margin-bottom: 0.5rem;
+    line-height: 1.6;
+    font-family: 'IM Fell Regular', serif;
+}
+
+.poem-line:first-letter {
+    margin-left: -0.5rem;
+}
+
+.poem-heading {
+    margin: 2rem 0 1rem 0;
+    color: var(--text-color);
+    font-family: 'IM Fell Regular', serif;
+    font-size: 1.2em;
+}
+
+.work-section h3 {
+    margin: 1.5rem 0 1rem 0;
+    color: var(--text-color);
+    font-family: 'IM Fell Regular', serif;
 }
 
 /* Responsive design */

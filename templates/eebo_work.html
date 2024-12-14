@@ -17,20 +17,20 @@
     </div>
 
     <div class="work-content">
-        {% for section_title, section_content in content %}
-            <div class="work-section">
-                <h2>{{ section_title }}</h2>
-                {% for type, text in section_content %}
-                    {% if type == 'p' %}
-                        <p>{{ text }}</p>
-                    {% elif type == 'head' %}
-                        <h3>{{ text }}</h3>
-                    {% else %}
-                        <p><em>Unknown content type</em></p>
-                    {% endif %}
-                {% endfor %}
-            </div>
-        {% endfor %}
-    </div>
+    {% for section_title, section_content in content %}
+        <div class="work-section">
+            <h2>{{ section_title }}</h2>
+            {% for type, text in section_content %}
+                {% if type == 'head' %}
+                    <h3 class="poem-heading">{{ text }}</h3>
+                {% elif type == 'line' %}
+                    <div class="poem-line">{{ text }}</div>
+                {% elif type == 'p' %}
+                    <p>{{ text }}</p>
+                {% endif %}
+            {% endfor %}
+        </div>
+    {% endfor %}
+</div>
 </div>
 {% endblock %}

@@ -4,11 +4,13 @@ from xml.etree import ElementTree as ET
 class XMLProcessor:
     """Processor for historical texts in XML format, particularly EEBO-TCP and play texts.
 
-    Specializes in handling early modern English texts including:
+    Specializes in handling:
+    - EEBO-TCP text formatting
+    - Early modern English text
     - Special character processing
     - Historical hyphenation
-    - Drama and play structures
-    - EEBO-TCP specific formatting
+    - Poetry structures
+    - Drama structures
     """
 
     def __init__(self):
@@ -18,6 +20,10 @@ class XMLProcessor:
 
     def process_text_with_marks(self, element):
         """Process text while preserving historical marks and hyphenation"""
+        if element is None:
+            return ""
+
+        # First collect all text parts
         text_parts = []
         for item in element.itertext():
             text_parts.append(item)
@@ -25,33 +31,131 @@ class XMLProcessor:
         # Join all text first
         text = ''.join(text_parts)
 
-        # Handle special characters
-        for historical_mark in element.findall(".//g"):
-            mark_type = historical_mark.get('ref', '')
-            if 'EOLhyphen' in mark_type:
-                previous_text = historical_mark.tail or ''
-                following_text = historical_mark.getnext().text if historical_mark.getnext() is not None else ''
-                text = text.replace(previous_text + ' ' + following_text,
-                                    previous_text.rstrip() + '-' + following_text.lstrip())
-            elif 'cmbAbbrStroke' in mark_type:
-                text = text.replace(historical_mark.tail or '', '̄' + (historical_mark.tail or ''))
+        # Find all g elements and process them in order
+        for g_elem in element.findall(".//g"):
+            ref = g_elem.get('ref', '')
 
+            # Handle hyphenation
+            if 'EOLhyphen' in ref:
+                # Get surrounding text
+                prev_text = g_elem.tail or ''
+                next_elem = g_elem.getnext()
+                if next_elem is not None:
+                    next_text = next_elem.text or ''
+                    # Replace the space between hyphenated parts with a hyphen
+                    text = text.replace(prev_text + ' ' + next_text,
+                                        prev_text.rstrip() + '-' + next_text.lstrip())
+
+        text = ' '.join(text.split())  # Normalize whitespace
         return text
 
-    def get_character_mappings(self, root):
-        """Extract character mappings from play XML"""
-        character_list = []
-        for character in root.findall('.//persona'):
-            character_name = character.find('persname')
-            if character_name is not None:
-                abbreviated_name = character_name.get('short', '')
-                full_name = character_name.text or ''
-                if abbreviated_name and full_name:
-                    character_list.append({
-                        'short': abbreviated_name,
-                        'full': full_name
-                    })
-        return sorted(character_list, key=lambda x: x['short'])
+    def process_eebo_content(self, root):
+        """Process EEBO-TCP XML content"""
+        content = []
+
+        # Find body with namespace
+        body = root.find('.//tei:body', self.namespaces)
+        if body is None:
+            body = root.find('.//body')  # Try without namespace
+            if body is None:
+                return content
+
+        # Process each div based on type
+        for div in body.findall('.//tei:div', self.namespaces):
+            div_type = div.get('type', '')
+
+            if div_type == 'poem':
+                poem_content = self.process_poem_div(div)
+                if poem_content:
+                    head = div.find('.//tei:head', self.namespaces) or div.find('head')
+                    title = self.process_text_with_marks(head) if head is not None else 'Poem'
+                    content.append((title, poem_content))
+
+            elif div_type in ['text', 'chapter']:
+                prose_content = self.process_prose_div(div)
+                if prose_content:
+                    head = div.find('.//tei:head', self.namespaces) or div.find('head')
+                    title = self.process_text_with_marks(head) if head is not None else 'Section'
+                    content.append((title, prose_content))
+
+        return content
+
+    def process_poem_div(self, div):
+        """Process a poem div and its parts"""
+        content = []
+        processed_headings = set()
+
+        def add_heading(elem):
+            """Add heading if it hasn't been processed yet"""
+            if elem is not None:
+                text = self.process_text_with_marks(elem)
+                if text and text.strip() and text not in processed_headings:
+                    processed_headings.add(text)
+                    return ('head', text.strip())
+            return None
+
+        # Process main poem heading
+        main_head = div.find('tei:head', self.namespaces) or div.find('head')
+        if main_head is not None:
+            heading = add_heading(main_head)
+            if heading:
+                content.append(heading)
+
+        # Process figures with their lines
+        for fig in div.findall('.//figure'):
+            for line in fig.findall('l'):
+                text = self.process_text_with_marks(line)
+                if text and text.strip():
+                    content.append(('line', text.strip()))
+
+            # Process figure heading if present
+            fig_head = fig.find('head')
+            if fig_head is not None:
+                heading = add_heading(fig_head)
+                if heading:
+                    content.append(heading)
+
+        # Process parts
+        for part in div.findall('div[@type="part"]'):
+            # Process part heading
+            part_head = part.find('head')
+            if part_head is not None:
+                heading = add_heading(part_head)
+                if heading:
+                    content.append(heading)
+
+            # Process lines in part
+            for line in part.findall('l'):
+                text = self.process_text_with_marks(line)
+                if text and text.strip():
+                    content.append(('line', text.strip()))
+
+            # Process line groups in part
+            for lg in part.findall('lg'):
+                for line in lg.findall('l'):
+                    text = self.process_text_with_marks(line)
+                    if text and text.strip():
+                        content.append(('line', text.strip()))
+
+        return content
+
+    def process_prose_div(self, div):
+        """Process a prose div and its parts"""
+        content = []
+
+        # Process paragraphs
+        for p in div.findall('.//tei:p', self.namespaces):
+            text = self.process_text_with_marks(p)
+            if text and text.strip():
+                content.append(('p', text.strip()))
+
+        # Process headers
+        for head in div.findall('.//tei:head', self.namespaces):
+            text = self.process_text_with_marks(head)
+            if text and text.strip():
+                content.append(('head', text.strip()))
+
+        return content
 
     def process_play_content(self, root):
         """Process dramatic content from play XML"""
@@ -72,6 +176,21 @@ class XMLProcessor:
             'acts': acts,
             'character_mappings': character_mappings
         }
+
+    def get_character_mappings(self, root):
+        """Extract character mappings from play XML"""
+        character_list = []
+        for character in root.findall('.//persona'):
+            character_name = character.find('persname')
+            if character_name is not None:
+                abbreviated_name = character_name.get('short', '')
+                full_name = character_name.text or ''
+                if abbreviated_name and full_name:
+                    character_list.append({
+                        'short': abbreviated_name,
+                        'full': full_name
+                    })
+        return sorted(character_list, key=lambda x: x['short'])
 
     def process_acts(self, root):
         """Process acts from play XML"""
@@ -168,53 +287,3 @@ class XMLProcessor:
             'speaker': speaker,
             'lines': dialogue_lines
         }
-
-    def process_eebo_content(self, root):
-        """Process EEBO-TCP XML content"""
-        content = []
-
-        # Get all major sections
-        front = root.find('.//tei:front', self.namespaces)
-        body = root.find('.//tei:body', self.namespaces)
-
-        # Process front matter if it exists
-        if front is not None:
-            front_content = self.process_eebo_section(front)
-            if front_content:
-                content.append(('Front Matter', front_content))
-
-        # Process main text if it exists
-        if body is not None:
-            # Process each div in the body
-            for div in body.findall('.//tei:div', self.namespaces):
-                div_content = self.process_eebo_section(div)
-                if div_content:
-                    # Get the chapter heading if it exists
-                    head = div.find('tei:head', self.namespaces)
-                    section_title = self.process_text_with_marks(head) if head is not None else 'Main Text'
-                    content.append((section_title, div_content))
-
-        return content
-
-    def process_eebo_section(self, section):
-        """Process a section of EEBO-TCP XML"""
-        content = []
-        processed_headings = set()  # Keep track of headings we've seen
-
-        for elem in section.iter():
-            tag = elem.tag.split('}')[-1]  # Remove namespace
-
-            if tag == 'p':  # Paragraph content
-                text = self.process_text_with_marks(elem)
-                if text and text.strip():
-                    content.append(('p', text.strip()))
-
-            elif tag == 'head':  # Heading
-                text = self.process_text_with_marks(elem)
-                if text and text.strip():
-                    # Only add heading if we haven't seen it before
-                    if text not in processed_headings:
-                        processed_headings.add(text)
-                        content.append(('head', text.strip()))
-
-        return content

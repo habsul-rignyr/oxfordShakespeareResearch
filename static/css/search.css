@@ -1,11 +1,9 @@
-/* General Container Styling */
-.search-container {
+.search-page-container {
     display: flex;
     gap: 20px;
     padding: 20px;
-    background-color: #f9f9f9;
+    background-color: var(--nav-bg);
     border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     max-width: 1200px;
     margin: 0 auto;
 }
@@ -13,17 +11,16 @@
 /* Sidebar Filters */
 .search-filters {
     width: 300px;
-    background: #ffffff;
+    background: var(--bg-color);
     padding: 15px;
-    border: 1px solid #e0e0e0;
+    border: 1px solid var(--nav-border);
     border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
 .search-filters h3 {
     font-size: 1.2em;
     margin-bottom: 10px;
-    color: #333;
+    color: var(--text-color);
 }
 
 /* Search Box and Button */
@@ -175,34 +172,32 @@
 .search-results {
     flex: 1;
     padding: 15px;
-    background: #ffffff;
-    border: 1px solid #e0e0e0;
+    background: var(--bg-color);
+    border: 1px solid var(--nav-border);
     border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
 .results-count {
     margin-bottom: 15px;
     font-size: 1em;
-    color: #555;
+    color: var(--stage-direction-color);
 }
 
-/* Result Card Styling */
 .result-card {
     padding: 15px;
-    border-bottom: 1px solid #e0e0e0;
+    border-bottom: 1px solid var(--nav-border);
     margin-bottom: 15px;
 }
 
 .result-card h3 {
     font-size: 1.2em;
     margin-bottom: 5px;
-    color: #007bff;
+    color: var(--text-color);
 }
 
 .result-card .result-metadata {
     font-size: 0.9em;
-    color: #555;
+    color: var(--stage-direction-color);
 }
 
 /* Add to your existing search.css */
